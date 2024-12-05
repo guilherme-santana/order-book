@@ -1,10 +1,15 @@
 package orderbook.dataprovider.controllers;
 
+import orderbook.domain.models.Book;
+import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
+import orderbook.domain.services.OrderRequest;
+import orderbook.domain.services.OrderResponse;
 import orderbook.domain.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -28,8 +33,17 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createNewOrder(@RequestBody Order order){
-        return orderService.createNewOrder(order);
+    public OrderResponse createNewOrder(@RequestBody OrderRequest request){
+        Order order = new Order();
+        order.setBook(new Book(request.getBookId()));
+        order.setCustomer(new Customer(request.getCustomerId()));
+        order.setOrderType(request.getOrderType());
+        order.setPrice(request.getPrice());
+        order.setAmount(request.getAmount());
+        order.setOrderStatus(request.getOrderStatus());
+        order.setLocalDateTime(LocalDateTime.now());
+
+        return orderService.createNewOrder(order).getBody();
     }
 
     @PutMapping("/{id}")

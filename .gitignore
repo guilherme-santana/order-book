@@ -1,6 +1,6 @@
 # Compiled class file
 *.class
-*.gradle
+.gradle/
 *.idea
 *.vscode/
 */build/

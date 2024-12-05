@@ -11,9 +11,16 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(unique = true)
+    private String symbol;
     private String name;
-    @OneToMany(mappedBy = "book")
+    private String description;
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
+
+    public Book(long id) {
+        this.id = id;
+    }
 
     public long getId() {
         return id;
@@ -29,6 +36,14 @@ public class Book {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public List<Order> getOrders() {

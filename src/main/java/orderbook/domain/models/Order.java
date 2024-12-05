@@ -1,6 +1,9 @@
 package orderbook.domain.models;
 
 import jakarta.persistence.*;
+import orderbook.enuns.OrderStatus;
+import orderbook.enuns.OrderType;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ordens")
@@ -9,16 +12,26 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
-    private String tipo;
-    private Double preco;
-    private Integer quantidade;
+
+    @Enumerated(EnumType.STRING)
+    private OrderType orderType;
+
+    private Double price;
+
+    private Integer amount;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    private LocalDateTime localDateTime;
+
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
-
 
     public long getId() {
         return id;
@@ -28,27 +41,59 @@ public class Order {
         this.id = id;
     }
 
-    public String getTipo() {
-        return tipo;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
-    public Double getPreco() {
-        return preco;
+    public OrderType getOrderType() {
+        return orderType;
     }
 
-    public void setPreco(Double preco) {
-        this.preco = preco;
+    public void setOrderType(OrderType orderType) {
+        this.orderType = orderType;
     }
 
-    public Integer getQuantidade() {
-        return quantidade;
+    public Double getPrice() {
+        return price;
     }
 
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
+    public OrderStatus getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
+    public LocalDateTime getLocalDateTime() {
+        return localDateTime;
+    }
+
+    public void setLocalDateTime(LocalDateTime localDateTime) {
+        this.localDateTime = localDateTime;
+    }
+
+    public Book getBook() {
+        return book;
+    }
+
+    public void setBook(Book book) {
+        this.book = book;
     }
 }
