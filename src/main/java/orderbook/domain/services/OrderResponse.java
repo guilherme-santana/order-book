@@ -2,6 +2,7 @@ package orderbook.domain.services;
 
 import orderbook.enuns.OrderStatus;
 import orderbook.enuns.OrderType;
+import org.springframework.http.HttpEntity;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,8 @@ public class OrderResponse {
     private Integer amount;
     private OrderStatus orderStatus;
     private LocalDateTime localDateTime;
+    private String bookName;
+
 
     public LocalDateTime getLocalDateTime() {
         return localDateTime;
@@ -60,5 +63,13 @@ public class OrderResponse {
 
     public void setOrderStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
+    }
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
     }
 }

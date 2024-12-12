@@ -18,11 +18,11 @@ public class BookService {
 
     }
 
-    public List<Book> findAllOrders(){
+    public List<Book> findAllBooks(){
             return bookRepository.findAll();
     }
 
-    public Book findOrderById(Long id){
+    public Book findBookById(Long id){
         return bookRepository.findById(id).orElseThrow();
     }
 

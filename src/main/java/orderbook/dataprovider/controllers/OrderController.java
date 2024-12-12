@@ -1,15 +1,14 @@
 package orderbook.dataprovider.controllers;
 
-import orderbook.domain.models.Book;
-import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
 import orderbook.domain.services.OrderRequest;
-import orderbook.domain.services.OrderResponse;
 import orderbook.domain.services.OrderService;
+import orderbook.exceptions.ExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,38 +22,52 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> findAllOrders(){
+    public List<Order> findAllOrders() {
         return orderService.findAllOrders();
     }
 
+    @GetMapping("/open")
+    public List<Order> findByOpenOrders() {
+        return orderService.findByOpenOrders();
+    }
+
     @GetMapping("/{id}")
-    public Order findOrderById(@PathVariable Long id){
+    public Order findOrderById(@PathVariable Long id) {
         return orderService.findOrderById(id);
     }
 
     @PostMapping
-    public OrderResponse createNewOrder(@RequestBody OrderRequest request){
-        Order order = new Order();
-        order.setBook(new Book(request.getBookId()));
-        order.setCustomer(new Customer(request.getCustomerId()));
-        order.setOrderType(request.getOrderType());
-        order.setPrice(request.getPrice());
-        order.setAmount(request.getAmount());
-        order.setOrderStatus(request.getOrderStatus());
-        order.setLocalDateTime(LocalDateTime.now());
+    public ResponseEntity<?> createNewOrder(@RequestBody OrderRequest request) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(orderService.createNewOrder(request));
+        } catch (Exception e) {
+            throw new ExceptionHandler("Erro ao tentar criar nova ordem!");
+        }
 
-        return orderService.createNewOrder(order).getBody();
     }
 
     @PutMapping("/{id}")
-    public Order updateOrder(@PathVariable Long id, @RequestBody Order order){
-        order.setId(id);
-        return orderService.updateOrder(order);
+    public ResponseEntity<?> updateOrder(@PathVariable Long id, @RequestBody OrderRequest orderRequest) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(orderService.updateOrder(id, orderRequest));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteOrder(@PathVariable Long id){
-        orderService.deleteOrder(id);
+    public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
+        try {
+            orderService.cancelOrder(id);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
     }
 
 }

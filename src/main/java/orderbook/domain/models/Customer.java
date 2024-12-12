@@ -16,12 +16,12 @@ public class Customer {
 
     private Integer document;
 
-    @OneToMany(mappedBy = "customer")
-    private List<Order> orders;
 
     public Customer(long id) {
         this.id = id;
     }
+
+    public Customer() {}
 
     public long getId() {
         return id;
@@ -48,11 +48,4 @@ public class Customer {
         this.document = document;
     }
 
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
 }

@@ -15,8 +15,8 @@ public class Book {
     private String symbol;
     private String name;
     private String description;
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders;
+
+    public Book() {}
 
     public Book(long id) {
         this.id = id;
@@ -46,11 +46,4 @@ public class Book {
         this.description = description;
     }
 
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
 }
