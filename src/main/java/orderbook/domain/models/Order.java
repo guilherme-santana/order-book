@@ -33,6 +33,26 @@ public class Order {
     @JoinColumn(name = "book_id")
     private Book book;
 
+    public Order() {}
+
+    public Order(
+                 Customer customer,
+                 OrderType orderType,
+                 Double price,
+                 Integer amount,
+                 OrderStatus orderStatus,
+                 LocalDateTime localDateTime,
+                 Book book) {
+
+        this.customer = customer;
+        this.orderType = orderType;
+        this.price = price;
+        this.amount = amount;
+        this.orderStatus = orderStatus;
+        this.localDateTime = localDateTime;
+        this.book = book;
+    }
+
     public long getId() {
         return id;
     }

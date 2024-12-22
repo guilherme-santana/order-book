@@ -1,6 +1,7 @@
 package orderbook.domain.models;
 
 import jakarta.persistence.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -11,14 +12,17 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     private String name;
-
     private Integer document;
 
 
     public Customer(long id) {
         this.id = id;
+    }
+
+    public Customer(String name, Integer document) {
+        this.name = name;
+        this.document = document;
     }
 
     public Customer() {}

@@ -18,6 +18,12 @@ public class Book {
 
     public Book() {}
 
+    public Book(String symbol, String name, String description) {
+        this.symbol = symbol;
+        this.name = name;
+        this.description = description;
+    }
+
     public Book(long id) {
         this.id = id;
     }

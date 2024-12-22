@@ -5,14 +5,12 @@ import orderbook.domain.models.Book;
 import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
 
-import orderbook.enuns.OrderStatus;
-import orderbook.exceptions.ExceptionHandler;
+import orderbook.exceptions.ExceptionOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import static orderbook.enuns.OrderStatus.*;
@@ -21,12 +19,10 @@ import static orderbook.enuns.OrderStatus.*;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final BookService bookService;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, BookService bookService) {
+    public OrderService(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
-        this.bookService = bookService;
     }
 
     public List<Order> findAllOrders(){
@@ -41,59 +37,37 @@ public class OrderService {
         return orderRepository.findById(id).orElseThrow();
     }
 
-    public OrderResponse createNewOrder(OrderRequest orderRequest){
-        Order order = new Order();
-        order.setBook(new Book(orderRequest.getBookId()));
-        order.setCustomer(new Customer(orderRequest.getCustomerId()));
-        order.setOrderType(orderRequest.getOrderType());
-        order.setPrice(orderRequest.getPrice());
-        order.setAmount(orderRequest.getAmount());
-        order.setLocalDateTime(LocalDateTime.now());
-        order.setOrderStatus(PENDING);
+    public Order createNewOrder(OrderRequest orderRequest){
+        Order order = new Order(
+                new Customer(orderRequest.getCustomerId()),
+                orderRequest.getOrderType(),
+                orderRequest.getPrice(),
+                orderRequest.getAmount(),
+                PENDING,
+                LocalDateTime.now(),
+                new Book(orderRequest.getBookId())
+        );
 
-        Order orderCreated = orderRepository.save(order);
-
-        OrderResponse response = new OrderResponse();
-
-        response.setId(orderCreated.getId());
-        response.setOrderType(orderCreated.getOrderType());
-        response.setPrice(orderCreated.getPrice());
-        response.setAmount(orderCreated.getAmount());
-        response.setOrderStatus(PENDING);
-        response.setLocalDateTime(orderCreated.getLocalDateTime());
-        Book bookName = bookService.findBookById(order.getBook().getId());
-        response.setBookName(bookName.getName());
-
-        return response;
+        return orderRepository.save(order);
     }
 
-    public OrderResponse updateOrder(Long id, OrderRequest orderRequest){
+    public Order updateOrder(Long id, OrderRequest orderRequest){
         Order order = findOrderById(id);
         order.setAmount(orderRequest.getAmount());
         order.setPrice(orderRequest.getPrice());
         order.setLocalDateTime(LocalDateTime.now());
 
         if (order.getOrderStatus() != PENDING) {
-            throw new ExceptionHandler("Ordens executadas ou canceladas não podem ser alteradas!");
+            throw new ExceptionOrder("Ordens executadas ou canceladas não podem ser alteradas!");
         }
-        Order orderCreated = orderRepository.save(order);
-        OrderResponse response = new OrderResponse();
-        response.setId(orderCreated.getId());
-        response.setOrderType(orderCreated.getOrderType());
-        response.setPrice(orderCreated.getPrice());
-        response.setAmount(orderCreated.getAmount());
-        response.setOrderStatus(orderCreated.getOrderStatus());
-        response.setLocalDateTime(orderCreated.getLocalDateTime());
-        Book bookName = bookService.findBookById(order.getBook().getId());
-        response.setBookName(bookName.getName());
 
-        return response;
+        return orderRepository.save(order);
     }
 
     public void cancelOrder(Long id){
         Order order = findOrderById(id);
         if(order.getOrderStatus() != PENDING){
-            throw new ExceptionHandler("Ordens executadas ou canceladas não podem ser alteradas!");
+            throw new ExceptionOrder("Ordens executadas ou canceladas não podem ser alteradas!");
         }
 
         order.setOrderStatus(CANCELED);
