@@ -3,6 +3,8 @@ package orderbook.domain.models;
 import jakarta.persistence.*;
 import orderbook.enuns.OrderStatus;
 import orderbook.enuns.OrderType;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +22,8 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderType orderType;
 
-    private Double price;
+    @Column(columnDefinition = "DECIMAL(10, 2)")
+    private BigDecimal price;
 
     private Integer amount;
 
@@ -30,27 +33,26 @@ public class Order {
     private LocalDateTime localDateTime;
 
     @ManyToOne
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @JoinColumn(name = "asset_id")
+    private Asset asset;
 
     public Order() {}
 
     public Order(
                  Customer customer,
                  OrderType orderType,
-                 Double price,
+                 BigDecimal price,
                  Integer amount,
                  OrderStatus orderStatus,
                  LocalDateTime localDateTime,
-                 Book book) {
-
+                 Asset asset) {
         this.customer = customer;
         this.orderType = orderType;
         this.price = price;
         this.amount = amount;
         this.orderStatus = orderStatus;
         this.localDateTime = localDateTime;
-        this.book = book;
+        this.asset = asset;
     }
 
     public long getId() {
@@ -77,11 +79,11 @@ public class Order {
         this.orderType = orderType;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -109,11 +111,12 @@ public class Order {
         this.localDateTime = localDateTime;
     }
 
-    public Book getBook() {
-        return book;
+    public Asset getAsset() {
+        return asset;
     }
 
-    public void setBook(Book book) {
-        this.book = book;
+    public void setAsset(Asset asset) {
+        this.asset = asset;
     }
+
 }

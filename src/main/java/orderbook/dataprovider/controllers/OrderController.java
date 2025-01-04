@@ -1,8 +1,8 @@
 package orderbook.dataprovider.controllers;
 
-import orderbook.domain.models.Book;
+import orderbook.domain.models.Asset;
 import orderbook.domain.models.Order;
-import orderbook.domain.services.BookService;
+import orderbook.domain.services.AssetsService;
 import orderbook.domain.services.OrderRequest;
 import orderbook.domain.services.OrderResponse;
 import orderbook.domain.services.OrderService;
@@ -18,12 +18,12 @@ import java.util.List;
 @RequestMapping("/order")
 public class OrderController {
     private final OrderService orderService;
-    private final BookService bookService;
+    private final AssetsService assetsService;
 
     @Autowired
-    public OrderController(OrderService orderService, BookService bookService) {
+    public OrderController(OrderService orderService, AssetsService assetsService) {
         this.orderService = orderService;
-        this.bookService = bookService;
+        this.assetsService = assetsService;
     }
 
     @GetMapping
@@ -53,14 +53,17 @@ public class OrderController {
             response.setAmount(orderCreated.getAmount());
             response.setOrderStatus(orderCreated.getOrderStatus());
             response.setLocalDateTime(orderCreated.getLocalDateTime());
-            Book bookName = bookService.findBookById(orderCreated.getBook().getId());
-            response.setBookName(bookName.getName());
+            Asset bookName = assetsService.findAssetsById(orderCreated.getAsset().getId());
+            response.setAssetName(bookName.getName());
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(response);
         } catch (Exception e) {
-            throw new ExceptionOrder("Erro ao tentar criar nova ordem!");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+
         }
 
     }
@@ -77,8 +80,8 @@ public class OrderController {
             response.setAmount(orderUpdated.getAmount());
             response.setOrderStatus(orderUpdated.getOrderStatus());
             response.setLocalDateTime(orderUpdated.getLocalDateTime());
-            Book bookName = bookService.findBookById(orderUpdated.getBook().getId());
-            response.setBookName(bookName.getName());
+            Asset assetName = assetsService.findAssetsById(orderUpdated.getAsset().getId());
+            response.setAssetName(assetName.getName());
 
             return ResponseEntity
                     .status(HttpStatus.OK)

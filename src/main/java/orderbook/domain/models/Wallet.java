@@ -1,8 +1,6 @@
 package orderbook.domain.models;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
-
 import java.math.BigDecimal;
 
 @Entity
@@ -19,6 +17,14 @@ public class Wallet {
 
     @Column(columnDefinition = "DECIMAL(10, 2)")
     private BigDecimal balance;
+
+    public Wallet(BigDecimal balance, Customer customer) {
+        this.balance = balance;
+        this.customer = customer;
+    }
+
+    public Wallet() {
+    }
 
     public Long getId() {
         return id;

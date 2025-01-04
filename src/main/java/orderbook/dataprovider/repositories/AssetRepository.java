@@ -1,10 +1,10 @@
 package orderbook.dataprovider.repositories;
 
-import orderbook.domain.models.Book;
+import orderbook.domain.models.Asset;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BookRepository extends JpaRepository<Book,Long> {
+public interface AssetRepository extends JpaRepository<Asset,Long> {
 
 }

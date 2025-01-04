@@ -21,4 +21,6 @@ public class CustomerStockService {
     public List<CustomerStock> findCustomerStockByCustomerId(Long customerId){
         return customerStockRepository.findByCustomerID(customerId);
     }
+
+
 }

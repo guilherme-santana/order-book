@@ -1,13 +1,13 @@
 package orderbook.domain.services;
 
-import orderbook.dataprovider.repositories.BookRepository;
 import orderbook.dataprovider.repositories.WalletRepository;
-import orderbook.domain.models.Book;
+import orderbook.domain.models.Order;
 import orderbook.domain.models.Wallet;
+import orderbook.exceptions.ExceptionOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 public class WalletService {
@@ -24,7 +24,53 @@ public class WalletService {
     }
 
 
+    public void createTransactionBidWallet(Order order){
+        Wallet wallet = findWalletByCustomerId(order.getCustomer().getId());
+        BigDecimal actualBalance = wallet.getBalance();
+        Integer amount = order.getAmount();
+        BigDecimal orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount));
 
+        if(actualBalance.compareTo(orderPrice) < 0){
+            throw new ExceptionOrder("Saldo insuficiente!");
+        }
+
+        BigDecimal balance = actualBalance.subtract(orderPrice);
+        wallet.setBalance(balance);
+
+        walletRepository.save(wallet);
+    }
+
+    public void updateTransactionBidWallet(Order order, OrderRequest orderRequest){
+        BigDecimal originalPrice = order.getPrice().multiply(BigDecimal.valueOf(order.getAmount()));
+
+        Wallet wallet = findWalletByCustomerId(order.getCustomer().getId());
+        BigDecimal actualBalance = wallet.getBalance();
+        BigDecimal realBalance = actualBalance.add(originalPrice);
+
+        Integer amount = orderRequest.getAmount();
+        BigDecimal orderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
+
+        if(realBalance.compareTo(orderPrice) < 0){
+            throw new ExceptionOrder("Saldo insuficiente!");
+        }
+
+        BigDecimal balance = realBalance.subtract(orderPrice);
+        wallet.setBalance(balance);
+
+        walletRepository.save(wallet);
+    }
+
+    public void cancellTransactionBidWallet(Order order){
+        Wallet wallet = findWalletByCustomerId(order.getCustomer().getId());
+        BigDecimal actualBalance = wallet.getBalance();
+        Integer amount = order.getAmount();
+        BigDecimal orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount));
+
+        BigDecimal balance = actualBalance.add(orderPrice);
+        wallet.setBalance(balance);
+
+        walletRepository.save(wallet);
+    }
 
 
 }

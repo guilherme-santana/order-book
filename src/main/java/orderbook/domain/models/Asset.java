@@ -2,11 +2,9 @@ package orderbook.domain.models;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
-@Table(name = "book")
-public class Book {
+@Table(name = "asset")
+public class Asset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,17 +14,15 @@ public class Book {
     private String name;
     private String description;
 
-    public Book() {}
+    public Asset() {
+    }
 
-    public Book(String symbol, String name, String description) {
+    public Asset(String symbol, String name, String description) {
         this.symbol = symbol;
         this.name = name;
         this.description = description;
     }
 
-    public Book(long id) {
-        this.id = id;
-    }
 
     public long getId() {
         return id;

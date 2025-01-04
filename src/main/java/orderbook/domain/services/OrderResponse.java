@@ -2,18 +2,18 @@ package orderbook.domain.services;
 
 import orderbook.enuns.OrderStatus;
 import orderbook.enuns.OrderType;
-import org.springframework.http.HttpEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class OrderResponse {
     private Long id;
     private OrderType orderType;
-    private Double price;
+    private BigDecimal price;
     private Integer amount;
     private OrderStatus orderStatus;
     private LocalDateTime localDateTime;
-    private String bookName;
+    private String assetName;
 
 
     public LocalDateTime getLocalDateTime() {
@@ -41,11 +41,11 @@ public class OrderResponse {
         this.orderType = orderType;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -65,11 +65,11 @@ public class OrderResponse {
         this.orderStatus = orderStatus;
     }
 
-    public String getBookName() {
-        return bookName;
+    public String getAssetName() {
+        return assetName;
     }
 
-    public void setBookName(String bookName) {
-        this.bookName = bookName;
+    public void setAssetName(String assetName) {
+        this.assetName = assetName;
     }
 }

@@ -16,10 +16,6 @@ public class Customer {
     private Integer document;
 
 
-    public Customer(long id) {
-        this.id = id;
-    }
-
     public Customer(String name, Integer document) {
         this.name = name;
         this.document = document;

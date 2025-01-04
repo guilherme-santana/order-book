@@ -3,20 +3,22 @@ package orderbook.domain.services;
 import orderbook.enuns.OrderStatus;
 import orderbook.enuns.OrderType;
 
+import java.math.BigDecimal;
+
 public class OrderRequest {
-    private Long bookId;
+    private Long assetId;
     private Long customerId;
     private OrderType orderType;
     private Double price;
     private Integer amount;
     private OrderStatus orderStatus;
 
-    public Long getBookId() {
-        return bookId;
+    public Long getAssetId() {
+        return assetId;
     }
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
+    public void setAssetId(Long assetId) {
+        this.assetId = assetId;
     }
 
     public Long getCustomerId() {
@@ -35,8 +37,8 @@ public class OrderRequest {
         this.orderType = orderType;
     }
 
-    public Double getPrice() {
-        return price;
+    public BigDecimal getPrice() {
+        return BigDecimal.valueOf(price);
     }
 
     public void setPrice(Double price) {

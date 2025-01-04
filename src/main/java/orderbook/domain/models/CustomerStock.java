@@ -15,10 +15,19 @@ public class CustomerStock {
     private Customer customer;
 
     @ManyToOne
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @JoinColumn(name = "asset_id")
+    private Asset asset;
 
     private Integer amount;
+
+    public CustomerStock() {
+    }
+
+    public CustomerStock(Customer customer, Asset asset, Integer amount) {
+        this.customer = customer;
+        this.asset = asset;
+        this.amount = amount;
+    }
 
     public Long getId() {
         return id;
@@ -36,12 +45,12 @@ public class CustomerStock {
         this.customer = customer;
     }
 
-    public Book getBook() {
-        return book;
+    public Asset getAsset() {
+        return asset;
     }
 
-    public void setBook(Book book) {
-        this.book = book;
+    public void setAsset(Asset asset) {
+        this.asset = asset;
     }
 
     public Integer getAmount() {
