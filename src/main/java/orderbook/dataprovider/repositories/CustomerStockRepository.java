@@ -13,4 +13,10 @@ public interface CustomerStockRepository extends JpaRepository<CustomerStock,Lon
     @Query("SELECT cs FROM CustomerStock cs WHERE cs.customer.id = :customerId")
     List<CustomerStock> findByCustomerID(@Param("customerId") Long customerId);
 
+    @Query("SELECT cs FROM CustomerStock cs WHERE cs.customer.id = :customerId and cs.asset.id = :assetId")
+    CustomerStock findByCustomerIdAndAssetId(
+            @Param("customerId") Long customerId,
+            @Param("assetId") Long assetId
+    );
+
 }

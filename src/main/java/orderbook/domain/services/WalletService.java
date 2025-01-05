@@ -48,13 +48,13 @@ public class WalletService {
         BigDecimal realBalance = actualBalance.add(originalPrice);
 
         Integer amount = orderRequest.getAmount();
-        BigDecimal orderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
+        BigDecimal newOrderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
 
-        if(realBalance.compareTo(orderPrice) < 0){
+        if(realBalance.compareTo(newOrderPrice) < 0){
             throw new ExceptionOrder("Saldo insuficiente!");
         }
 
-        BigDecimal balance = realBalance.subtract(orderPrice);
+        BigDecimal balance = realBalance.subtract(newOrderPrice);
         wallet.setBalance(balance);
 
         walletRepository.save(wallet);

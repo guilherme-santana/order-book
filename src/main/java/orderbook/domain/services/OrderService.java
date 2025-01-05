@@ -23,13 +23,15 @@ public class OrderService {
     private final CustomerService customerService;
     private final AssetsService assetsService;
     private final WalletService walletService;
+    private final CustomerStockService customerStockService;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, CustomerService customerService, AssetsService assetsService, WalletService walletService) {
+    public OrderService(OrderRepository orderRepository, CustomerService customerService, AssetsService assetsService, WalletService walletService, CustomerStockService customerStockService) {
         this.orderRepository = orderRepository;
         this.customerService = customerService;
         this.assetsService = assetsService;
         this.walletService = walletService;
+        this.customerStockService = customerStockService;
     }
 
     public List<Order> findAllOrders(){
@@ -67,6 +69,8 @@ public class OrderService {
 
         if(order.getOrderType().equals(OrderType.BIDS)){
             walletService.createTransactionBidWallet(order);
+        } else if(order.getOrderType().equals(OrderType.ASKS)){
+            customerStockService.createTransactionAskAsset(order);
         }
 
         return orderRepository.save(order);
@@ -81,6 +85,8 @@ public class OrderService {
 
         if(order.getOrderType().equals(OrderType.BIDS)){
             walletService.updateTransactionBidWallet(order, orderRequest);
+        } else if(order.getOrderType().equals(OrderType.ASKS)){
+            customerStockService.updateTransactionAskAsset(order, orderRequest);
         }
 
         order.setAmount(orderRequest.getAmount());
@@ -99,6 +105,8 @@ public class OrderService {
 
         if(order.getOrderType().equals(OrderType.BIDS)) {
             walletService.cancellTransactionBidWallet(order);
+        } else if(order.getOrderType().equals(OrderType.ASKS)){
+            customerStockService.cancellTransactionAskAsset(order);
         }
 
         order.setOrderStatus(CANCELED);
