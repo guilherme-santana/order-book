@@ -35,13 +35,13 @@ public class WalletService {
         }
 
         BigDecimal balance = actualBalance.subtract(orderPrice);
-        wallet.setBalance(balance);
+        wallet.updateBalance(balance);
 
         walletRepository.save(wallet);
     }
 
     public void updateTransactionBidWallet(Order order, OrderRequest orderRequest){
-        BigDecimal originalPrice = order.getPrice().multiply(BigDecimal.valueOf(order.getAmount()));
+        BigDecimal originalPrice = order.getOriginalprice(order);
 
         Wallet wallet = findWalletByCustomerId(order.getCustomer().getId());
         BigDecimal actualBalance = wallet.getBalance();
@@ -55,7 +55,7 @@ public class WalletService {
         }
 
         BigDecimal balance = realBalance.subtract(newOrderPrice);
-        wallet.setBalance(balance);
+        wallet.updateBalance(balance);
 
         walletRepository.save(wallet);
     }
@@ -67,9 +67,20 @@ public class WalletService {
         BigDecimal orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount));
 
         BigDecimal balance = actualBalance.add(orderPrice);
-        wallet.setBalance(balance);
+        wallet.updateBalance(balance);
 
         walletRepository.save(wallet);
+    }
+
+    public void updateSellerWallet(Long sellerId, Order order){
+        Wallet sellerWallet = findWalletByCustomerId(sellerId);
+
+        BigDecimal newValue = sellerWallet.getBalance().add(order.getOriginalprice(order));
+
+        sellerWallet.updateBalance(newValue);
+
+        walletRepository.save(sellerWallet);
+
     }
 
 

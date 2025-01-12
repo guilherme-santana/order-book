@@ -83,6 +83,10 @@ public class Order {
         return price;
     }
 
+    public BigDecimal getOriginalprice(Order order){
+        return  order.getPrice().multiply(BigDecimal.valueOf(order.getAmount()));
+    }
+
     public void setPrice(BigDecimal price) {
         this.price = price;
     }

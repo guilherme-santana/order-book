@@ -1,6 +1,8 @@
 package orderbook.domain.services;
 
 import orderbook.dataprovider.repositories.CustomerStockRepository;
+import orderbook.domain.models.Asset;
+import orderbook.domain.models.Customer;
 import orderbook.domain.models.CustomerStock;
 import orderbook.domain.models.Order;
 import orderbook.exceptions.ExceptionOrder;
@@ -13,11 +15,13 @@ import java.util.List;
 public class CustomerStockService {
 
     private final CustomerStockRepository customerStockRepository;
+    private final AssetsService assetsService;
 
 
     @Autowired
-    public CustomerStockService(CustomerStockRepository customerStockRepository) {
+    public CustomerStockService(CustomerStockRepository customerStockRepository, AssetsService assetsService) {
         this.customerStockRepository = customerStockRepository;
+        this.assetsService = assetsService;
     }
 
     public List<CustomerStock> findCustomerStockByCustomerId(Long customerId){
@@ -26,6 +30,13 @@ public class CustomerStockService {
     
     public CustomerStock findByCustomerAndAsset(Long customerId, Long assetId){
         return customerStockRepository.findByCustomerIdAndAssetId(customerId, assetId);
+    }
+
+    public void createStockAsset(Customer customer, Asset asset, Integer amount){
+
+        CustomerStock customerStock = new CustomerStock(customer,asset,amount);
+
+        customerStockRepository.save(customerStock);
     }
     
     public void createTransactionAskAsset(Order order){
@@ -43,7 +54,7 @@ public class CustomerStockService {
         }
 
         Integer amount = actualAmount - orderAmount;
-        stock.setAmount(amount);
+        stock.updateAmount(amount);
 
         customerStockRepository.save(stock);
     }
@@ -63,7 +74,7 @@ public class CustomerStockService {
         }
 
         Integer amount = realAmount - newOrderAmount;
-        stock.setAmount(amount);
+        stock.updateAmount(amount);
 
         customerStockRepository.save(stock);
     }
@@ -75,9 +86,20 @@ public class CustomerStockService {
         Integer orderAmount = order.getAmount();
 
         Integer amount = actualAmount + orderAmount;
-        stock.setAmount(amount);
+        stock.updateAmount(amount);
 
         customerStockRepository.save(stock);
+    }
+
+    public void updateBuyerStockAsset(Customer buyer, Order order){
+        CustomerStock stockBuyer = findByCustomerAndAsset(buyer.getId(), order.getAsset().getId());
+        if(stockBuyer == null){
+            createStockAsset(buyer,assetsService.findAssetsById(order.getAsset().getId()), order.getAmount());
+        } else {
+            int newAmount = stockBuyer.getAmount() + order.getAmount();
+            stockBuyer.updateAmount(newAmount);
+            customerStockRepository.save(stockBuyer);
+        }
     }
 
 }

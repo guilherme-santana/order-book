@@ -1,6 +1,8 @@
 package orderbook.domain.models;
 
 import jakarta.persistence.*;
+import orderbook.exceptions.ExceptionOrder;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -46,7 +48,15 @@ public class Wallet {
         return balance;
     }
 
-    public void setBalance(BigDecimal balance) {
+    private void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
+
+    public void updateBalance(BigDecimal value) {
+        if (value.compareTo(BigDecimal.ZERO) < 0){
+            throw new ExceptionOrder("Saldor menor que zero!");
+        }
+        setBalance(value);
+    }
+
 }
