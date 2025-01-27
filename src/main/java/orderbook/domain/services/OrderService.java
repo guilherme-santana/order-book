@@ -127,31 +127,50 @@ public class OrderService {
     private Order executeOrder(List<Order> ordersMatch, Order orderInExecution) {
         if (!ordersMatch.isEmpty()) {
 
-            int tempAmountInExecution = orderInExecution.getAmount();
+            int amountOrderInExecution = orderInExecution.getAmount();
+            boolean isSatisfactoryOrder = false;
 
             for (Order orderMatch : ordersMatch) {
-                if (orderInExecution.getOrderType().equals(OrderType.BIDS)
-                        && tempAmountInExecution > 0) {
+                if (orderInExecution.getOrderType().equals(OrderType.BIDS)) {
+                    int amountOrderMatch = orderMatch.getAmount();
 
                     walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
                     customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
 
-                    tempAmountInExecution = Math.abs(tempAmountInExecution - orderMatch.getAmount());
+                    if (amountOrderInExecution > 0) {
 
-                    if (tempAmountInExecution == 0) {
-                        orderMatch.setOrderStatus(EXECUTED);
-                    } else {
-                        orderMatch.setAmount(tempAmountInExecution);
+                        amountOrderInExecution -= amountOrderMatch;
+
+                        if (amountOrderInExecution == 0) {
+                            orderMatch.setOrderStatus(EXECUTED);
+                            isSatisfactoryOrder = true;
+
+                        } else if (amountOrderMatch - orderInExecution.getAmount() <= 0) {
+                            orderMatch.setOrderStatus(EXECUTED);
+
+                        } else if (amountOrderMatch + (amountOrderMatch - orderInExecution.getAmount()) == 0) {
+                            orderMatch.setOrderStatus(EXECUTED);
+
+                        } else if (amountOrderInExecution < 0) {
+                            isSatisfactoryOrder = true;
+                            orderMatch.setAmount(Math.abs(amountOrderInExecution));
+
+                        } else {
+                            orderMatch.setAmount(amountOrderInExecution);
+                        }
+                        orderMatch.setLocalDateTime(LocalDateTime.now());
+                        orderRepository.save(orderMatch);
                     }
-                    orderMatch.setLocalDateTime(LocalDateTime.now());
-                    orderRepository.save(orderMatch);
-
                 }
             }
-
-            orderInExecution.setOrderStatus(EXECUTED);
+            if (isSatisfactoryOrder) {
+                orderInExecution.setOrderStatus(EXECUTED);
+            } else {
+                orderInExecution.setAmount(amountOrderInExecution);
+            }
             orderInExecution.setLocalDateTime(LocalDateTime.now());
             return orderInExecution;
+
         }
         return orderInExecution;
     }
