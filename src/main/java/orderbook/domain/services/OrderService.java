@@ -5,6 +5,7 @@ import orderbook.domain.models.Asset;
 import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
 
+import orderbook.enuns.OrderStatus;
 import orderbook.enuns.OrderType;
 import orderbook.exceptions.ExceptionOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,8 @@ public class OrderService {
             customerStockService.createTransactionAskAsset(order);
         }
 
+        orderRepository.save(order);
+
         return orderRepository.save(executeOrder(
                 findOrdersOpenValidForMatch(
                         order.getCustomer().getId(),
@@ -125,54 +128,80 @@ public class OrderService {
     }
 
     private Order executeOrder(List<Order> ordersMatch, Order orderInExecution) {
+        int originalAmountOrder = orderInExecution.getAmount();
         if (!ordersMatch.isEmpty()) {
-
-            int amountOrderInExecution = orderInExecution.getAmount();
-            boolean isSatisfactoryOrder = false;
 
             for (Order orderMatch : ordersMatch) {
                 if (orderInExecution.getOrderType().equals(OrderType.BIDS)) {
-                    int amountOrderMatch = orderMatch.getAmount();
-
                     walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
                     customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
 
-                    if (amountOrderInExecution > 0) {
-
-                        amountOrderInExecution -= amountOrderMatch;
-
-                        if (amountOrderInExecution == 0) {
-                            orderMatch.setOrderStatus(EXECUTED);
-                            isSatisfactoryOrder = true;
-
-                        } else if (amountOrderMatch - orderInExecution.getAmount() <= 0) {
-                            orderMatch.setOrderStatus(EXECUTED);
-
-                        } else if (amountOrderMatch + (amountOrderMatch - orderInExecution.getAmount()) == 0) {
-                            orderMatch.setOrderStatus(EXECUTED);
-
-                        } else if (amountOrderInExecution < 0) {
-                            isSatisfactoryOrder = true;
-                            orderMatch.setAmount(Math.abs(amountOrderInExecution));
-
-                        } else {
-                            orderMatch.setAmount(amountOrderInExecution);
+                    if (orderInExecution.getOrderStatus() == PENDING) {
+                        executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(orderMatch.getId(), orderInExecution.getId());
+                        if (!executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(orderMatch.getId(), orderInExecution.getId())) {
+                            executeOrderWhenOrderInExecutionIsLessThanOrderMatch(orderMatch.getId(), orderInExecution.getId());
                         }
-                        orderMatch.setLocalDateTime(LocalDateTime.now());
-                        orderRepository.save(orderMatch);
                     }
                 }
             }
-            if (isSatisfactoryOrder) {
-                orderInExecution.setOrderStatus(EXECUTED);
-            } else {
-                orderInExecution.setAmount(amountOrderInExecution);
-            }
-            orderInExecution.setLocalDateTime(LocalDateTime.now());
-            return orderInExecution;
 
         }
+        if (orderInExecution.getOrderStatus() == EXECUTED) {
+            orderInExecution.setAmount(originalAmountOrder);
+        }
         return orderInExecution;
+    }
+
+    private void executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(Long idOrdersMatch, Long idOrderInExecution) {
+        Order ordersMatch = findOrderById(idOrdersMatch);
+        Order orderInExecution = findOrderById(idOrderInExecution);
+
+        if (ordersMatch.getAmount() - orderInExecution.getAmount() == 0) {
+            ordersMatch.setOrderStatus(EXECUTED);
+            ordersMatch.setLocalDateTime(LocalDateTime.now());
+            orderRepository.save(ordersMatch);
+
+            orderInExecution.setOrderStatus(EXECUTED);
+            orderInExecution.setLocalDateTime(LocalDateTime.now());
+            orderRepository.save(orderInExecution);
+
+        }
+    }
+
+    private boolean executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(Long idOrdersMatch, Long idOrderInExecution) {
+        Order ordersMatch = findOrderById(idOrdersMatch);
+        Order orderInExecution = findOrderById(idOrderInExecution);
+
+        if (orderInExecution.getAmount() > ordersMatch.getAmount()) {
+            int amountExecution = orderInExecution.getAmount() - ordersMatch.getAmount();
+
+            orderInExecution.setAmount(amountExecution);
+
+            ordersMatch.setOrderStatus(EXECUTED);
+            ordersMatch.setLocalDateTime(LocalDateTime.now());
+            orderRepository.save(ordersMatch);
+
+            orderRepository.save(orderInExecution);
+            return true;
+        }
+        return false;
+    }
+
+    private void executeOrderWhenOrderInExecutionIsLessThanOrderMatch(Long idOrdersMatch, Long idOrderInExecution) {
+        Order ordersMatch = findOrderById(idOrdersMatch);
+        Order orderInExecution = findOrderById(idOrderInExecution);
+
+        if (orderInExecution.getAmount() < ordersMatch.getAmount()) {
+            int amountMatch = ordersMatch.getAmount() - orderInExecution.getAmount();
+
+            ordersMatch.setAmount(amountMatch);
+            ordersMatch.setLocalDateTime(LocalDateTime.now());
+            orderRepository.save(ordersMatch);
+
+            orderInExecution.setOrderStatus(EXECUTED);
+            orderInExecution.setLocalDateTime(LocalDateTime.now());
+            orderRepository.save(orderInExecution);
+        }
     }
 
 }
