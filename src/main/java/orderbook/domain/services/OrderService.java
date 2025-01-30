@@ -4,8 +4,6 @@ import orderbook.dataprovider.repositories.OrderRepository;
 import orderbook.domain.models.Asset;
 import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
-
-import orderbook.enuns.OrderStatus;
 import orderbook.enuns.OrderType;
 import orderbook.exceptions.ExceptionOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +77,6 @@ public class OrderService {
             customerStockService.createTransactionAskAsset(order);
         }
 
-        orderRepository.save(order);
-
         return orderRepository.save(executeOrder(
                 findOrdersOpenValidForMatch(
                         order.getCustomer().getId(),
@@ -132,16 +128,26 @@ public class OrderService {
         if (!ordersMatch.isEmpty()) {
 
             for (Order orderMatch : ordersMatch) {
+
+                if (orderInExecution.getOrderStatus() == PENDING) {
+
+                    if (orderMatch.getAmount() - orderInExecution.getAmount() == 0) {
+                        executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(orderMatch, orderInExecution);
+                    }
+
+                    if (orderInExecution.getAmount() > orderMatch.getAmount()) {
+                        executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(orderMatch, orderInExecution);
+
+                    } else if (orderInExecution.getAmount() < orderMatch.getAmount()) {
+                        executeOrderWhenOrderInExecutionIsLessThanOrderMatch(orderMatch, orderInExecution);
+                    }
+                }
                 if (orderInExecution.getOrderType().equals(OrderType.BIDS)) {
                     walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
                     customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
-
-                    if (orderInExecution.getOrderStatus() == PENDING) {
-                        executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(orderMatch.getId(), orderInExecution.getId());
-                        if (!executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(orderMatch.getId(), orderInExecution.getId())) {
-                            executeOrderWhenOrderInExecutionIsLessThanOrderMatch(orderMatch.getId(), orderInExecution.getId());
-                        }
-                    }
+                } else {
+                    walletService.updateSellerWallet(orderInExecution.getCustomer().getId(), orderMatch);
+                    customerStockService.updateBuyerStockAsset(orderMatch.getCustomer(), orderMatch);
                 }
             }
 
@@ -152,56 +158,38 @@ public class OrderService {
         return orderInExecution;
     }
 
-    private void executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(Long idOrdersMatch, Long idOrderInExecution) {
-        Order ordersMatch = findOrderById(idOrdersMatch);
-        Order orderInExecution = findOrderById(idOrderInExecution);
+    private void executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(Order ordersMatch, Order orderInExecution) {
 
-        if (ordersMatch.getAmount() - orderInExecution.getAmount() == 0) {
-            ordersMatch.setOrderStatus(EXECUTED);
-            ordersMatch.setLocalDateTime(LocalDateTime.now());
-            orderRepository.save(ordersMatch);
+        ordersMatch.setOrderStatus(EXECUTED);
+        ordersMatch.setLocalDateTime(LocalDateTime.now());
+        orderRepository.save(ordersMatch);
+        orderInExecution.setOrderStatus(EXECUTED);
+        orderInExecution.setLocalDateTime(LocalDateTime.now());
+        orderRepository.save(orderInExecution);
 
-            orderInExecution.setOrderStatus(EXECUTED);
-            orderInExecution.setLocalDateTime(LocalDateTime.now());
-            orderRepository.save(orderInExecution);
-
-        }
     }
 
-    private boolean executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(Long idOrdersMatch, Long idOrderInExecution) {
-        Order ordersMatch = findOrderById(idOrdersMatch);
-        Order orderInExecution = findOrderById(idOrderInExecution);
+    private void executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(Order ordersMatch, Order orderInExecution) {
 
-        if (orderInExecution.getAmount() > ordersMatch.getAmount()) {
-            int amountExecution = orderInExecution.getAmount() - ordersMatch.getAmount();
+        int amountExecution = orderInExecution.getAmount() - ordersMatch.getAmount();
+        orderInExecution.setAmount(amountExecution);
+        ordersMatch.setOrderStatus(EXECUTED);
+        ordersMatch.setLocalDateTime(LocalDateTime.now());
+        orderRepository.save(ordersMatch);
+        orderRepository.save(orderInExecution);
 
-            orderInExecution.setAmount(amountExecution);
-
-            ordersMatch.setOrderStatus(EXECUTED);
-            ordersMatch.setLocalDateTime(LocalDateTime.now());
-            orderRepository.save(ordersMatch);
-
-            orderRepository.save(orderInExecution);
-            return true;
-        }
-        return false;
     }
 
-    private void executeOrderWhenOrderInExecutionIsLessThanOrderMatch(Long idOrdersMatch, Long idOrderInExecution) {
-        Order ordersMatch = findOrderById(idOrdersMatch);
-        Order orderInExecution = findOrderById(idOrderInExecution);
+    private void executeOrderWhenOrderInExecutionIsLessThanOrderMatch(Order ordersMatch, Order orderInExecution) {
 
-        if (orderInExecution.getAmount() < ordersMatch.getAmount()) {
-            int amountMatch = ordersMatch.getAmount() - orderInExecution.getAmount();
+        int amountMatch = ordersMatch.getAmount() - orderInExecution.getAmount();
+        ordersMatch.setAmount(amountMatch);
+        ordersMatch.setLocalDateTime(LocalDateTime.now());
+        orderRepository.save(ordersMatch);
+        orderInExecution.setOrderStatus(EXECUTED);
+        orderInExecution.setLocalDateTime(LocalDateTime.now());
+        orderRepository.save(orderInExecution);
 
-            ordersMatch.setAmount(amountMatch);
-            ordersMatch.setLocalDateTime(LocalDateTime.now());
-            orderRepository.save(ordersMatch);
-
-            orderInExecution.setOrderStatus(EXECUTED);
-            orderInExecution.setLocalDateTime(LocalDateTime.now());
-            orderRepository.save(orderInExecution);
-        }
     }
 
 }

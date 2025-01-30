@@ -54,7 +54,7 @@ public class Wallet {
 
     public void updateBalance(BigDecimal value) {
         if (value.compareTo(BigDecimal.ZERO) < 0){
-            throw new ExceptionOrder("Saldor menor que zero!");
+            throw new ExceptionOrder("Saldo menor que zero!");
         }
         setBalance(value);
     }

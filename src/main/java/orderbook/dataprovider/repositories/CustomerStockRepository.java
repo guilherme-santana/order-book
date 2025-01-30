@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface CustomerStockRepository extends JpaRepository<CustomerStock,Long> {
 
-    @Query("SELECT cs FROM CustomerStock cs WHERE cs.customer.id = :customerId")
+    @Query("SELECT cs FROM CustomerStock cs WHERE cs.customer.id = :customerId and cs.amount != 0")
     List<CustomerStock> findByCustomerID(@Param("customerId") Long customerId);
 
     @Query("SELECT cs FROM CustomerStock cs WHERE cs.customer.id = :customerId and cs.asset.id = :assetId")

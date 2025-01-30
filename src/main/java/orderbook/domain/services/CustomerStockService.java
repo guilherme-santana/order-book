@@ -24,62 +24,66 @@ public class CustomerStockService {
         this.assetsService = assetsService;
     }
 
-    public List<CustomerStock> findCustomerStockByCustomerId(Long customerId){
+    public List<CustomerStock> findCustomerStockByCustomerId(Long customerId) {
         return customerStockRepository.findByCustomerID(customerId);
     }
-    
-    public CustomerStock findByCustomerAndAsset(Long customerId, Long assetId){
+
+    public CustomerStock findByCustomerAndAsset(Long customerId, Long assetId) {
         return customerStockRepository.findByCustomerIdAndAssetId(customerId, assetId);
     }
 
-    public void createStockAsset(Customer customer, Asset asset, Integer amount){
+    public void createStockAsset(Customer customer, Asset asset, Integer amount) {
 
-        CustomerStock customerStock = new CustomerStock(customer,asset,amount);
+        CustomerStock customerStock = new CustomerStock(customer, asset, amount);
 
         customerStockRepository.save(customerStock);
     }
-    
-    public void createTransactionAskAsset(Order order){
+
+    public void deleteStockAsset(Long customerId, Long assetId) {
+        customerStockRepository.deleteById(findByCustomerAndAsset(customerId, assetId).getId());
+    }
+
+    public void createTransactionAskAsset(Order order) {
         CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
 
-        if(stock == null){
+        if (stock == null) {
             throw new ExceptionOrder("Ativo não encontrado!");
         }
 
         Integer actualAmount = stock.getAmount();
         Integer orderAmount = order.getAmount();
 
-        if(actualAmount < orderAmount) {
+        if (actualAmount < orderAmount) {
             throw new ExceptionOrder("Quantidade de ativo não suficiente para realizar a operação!");
         }
 
-        Integer amount = actualAmount - orderAmount;
+        int amount = actualAmount - orderAmount;
         stock.updateAmount(amount);
-
         customerStockRepository.save(stock);
+
     }
 
-    public void updateTransactionAskAsset(Order order, OrderRequest orderRequest){
+    public void updateTransactionAskAsset(Order order, OrderRequest orderRequest) {
         CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
 
-        if(stock == null){
+        if (stock == null) {
             throw new ExceptionOrder("Ativo não encontrado!");
         }
 
         Integer realAmount = stock.getAmount() + order.getAmount();
         Integer newOrderAmount = orderRequest.getAmount();
 
-        if(realAmount < newOrderAmount) {
+        if (realAmount < newOrderAmount) {
             throw new ExceptionOrder("Quantidade de ativo não suficiente para realizar a operação!");
         }
 
-        Integer amount = realAmount - newOrderAmount;
+        int amount = realAmount - newOrderAmount;
         stock.updateAmount(amount);
-
         customerStockRepository.save(stock);
+
     }
 
-    public void cancellTransactionAskAsset(Order order){
+    public void cancellTransactionAskAsset(Order order) {
         CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
 
         Integer actualAmount = stock.getAmount();
@@ -91,10 +95,10 @@ public class CustomerStockService {
         customerStockRepository.save(stock);
     }
 
-    public void updateBuyerStockAsset(Customer buyer, Order order){
+    public void updateBuyerStockAsset(Customer buyer, Order order) {
         CustomerStock stockBuyer = findByCustomerAndAsset(buyer.getId(), order.getAsset().getId());
-        if(stockBuyer == null){
-            createStockAsset(buyer,assetsService.findAssetsById(order.getAsset().getId()), order.getAmount());
+        if (stockBuyer == null) {
+            createStockAsset(buyer, assetsService.findAssetsById(order.getAsset().getId()), order.getAmount());
         } else {
             int newAmount = stockBuyer.getAmount() + order.getAmount();
             stockBuyer.updateAmount(newAmount);
