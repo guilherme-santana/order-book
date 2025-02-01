@@ -7,6 +7,8 @@ import orderbook.domain.services.OrderRequest;
 import orderbook.domain.services.OrderResponse;
 import orderbook.domain.services.OrderService;
 import orderbook.exceptions.ExceptionOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/order")
 public class OrderController {
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+
     private final OrderService orderService;
     private final AssetsService assetsService;
 
@@ -56,10 +60,12 @@ public class OrderController {
             Asset bookName = assetsService.findAssetsById(orderCreated.getAsset().getId());
             response.setAssetName(bookName.getName());
 
+            log.info("M=createNewOrder, statusCode = {}", HttpStatus.CREATED);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(response);
         } catch (Exception e) {
+            log.error("M=createNewOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
@@ -83,10 +89,12 @@ public class OrderController {
             Asset assetName = assetsService.findAssetsById(orderUpdated.getAsset().getId());
             response.setAssetName(assetName.getName());
 
+            log.info("M=updateOrder, orderId = {}, statusCode = {}", id, HttpStatus.OK);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(response);
         } catch (Exception e) {
+            log.error("M=updateOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
         }
@@ -96,9 +104,11 @@ public class OrderController {
     public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
         try {
             orderService.cancelOrder(id);
+            log.info("M=cancelOrder, orderId = {}, statusCode = {}", id, HttpStatus.OK);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(null);
         } catch (Exception e) {
+            log.error("M=cancelOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
         }

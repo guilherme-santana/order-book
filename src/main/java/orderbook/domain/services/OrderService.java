@@ -7,6 +7,8 @@ import orderbook.domain.models.Order;
 
 import orderbook.enuns.OrderType;
 import orderbook.exceptions.ExceptionOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ import static orderbook.enuns.OrderStatus.*;
 
 @Service
 public class OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
@@ -52,6 +56,14 @@ public class OrderService {
     }
 
     public Order createNewOrder(OrderRequest orderRequest) {
+        log.info("M=createNewOrder, assetId = {}, customerId = {}, orderType = {}, price = {}, amount = {} ",
+                orderRequest.getAssetId(),
+                orderRequest.getCustomerId(),
+                orderRequest.getOrderType(),
+                orderRequest.getPrice(),
+                orderRequest.getAmount()
+        );
+
         Customer customer = customerService.findCustomerById(orderRequest.getCustomerId());
         Asset asset = assetsService.findAssetsById(orderRequest.getAssetId());
 
@@ -90,7 +102,13 @@ public class OrderService {
 
     public Order updateOrder(Long id, OrderRequest orderRequest) {
         Order order = findOrderById(id);
-
+        log.info("M=updateOrder, assetId = {}, customerId = {}, orderType = {}, price = {}, amount = {} ",
+                orderRequest.getAssetId(),
+                orderRequest.getCustomerId(),
+                orderRequest.getOrderType(),
+                orderRequest.getPrice(),
+                orderRequest.getAmount()
+        );
         if (order.getOrderStatus() != PENDING) {
             throw new ExceptionOrder("Ordens executadas ou canceladas não podem ser alteradas!");
         }
@@ -123,6 +141,7 @@ public class OrderService {
 
         order.setOrderStatus(CANCELED);
         order.setLocalDateTime(LocalDateTime.now());
+        log.info("M=cancelOrder, status = {}", order.getOrderStatus());
         orderRepository.save(order);
     }
 
@@ -162,7 +181,7 @@ public class OrderService {
     }
 
     private void executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(Order ordersMatch, Order orderInExecution) {
-
+        log.info("M=executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory, ordersMatchId = {}, orderInExecutionId = {}", ordersMatch.getId(), orderInExecution.getId());
         ordersMatch.setOrderStatus(EXECUTED);
         ordersMatch.setLocalDateTime(LocalDateTime.now());
         orderRepository.save(ordersMatch);
@@ -173,7 +192,7 @@ public class OrderService {
     }
 
     private void executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(Order ordersMatch, Order orderInExecution) {
-
+        log.info("M=executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch, ordersMatchId = {}, orderInExecutionId = {}", ordersMatch.getId(), orderInExecution.getId());
         int amountExecution = orderInExecution.getAmount() - ordersMatch.getAmount();
         orderInExecution.setAmount(amountExecution);
         ordersMatch.setOrderStatus(EXECUTED);
@@ -184,7 +203,7 @@ public class OrderService {
     }
 
     private void executeOrderWhenOrderInExecutionIsLessThanOrderMatch(Order ordersMatch, Order orderInExecution) {
-
+        log.info("M=executeOrderWhenOrderInExecutionIsLessThanOrderMatch, ordersMatchId = {}, orderInExecutionId = {}", ordersMatch.getId(), orderInExecution.getId());
         int amountMatch = ordersMatch.getAmount() - orderInExecution.getAmount();
         ordersMatch.setAmount(amountMatch);
         ordersMatch.setLocalDateTime(LocalDateTime.now());
