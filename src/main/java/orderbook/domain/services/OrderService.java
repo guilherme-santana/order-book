@@ -4,6 +4,7 @@ import orderbook.dataprovider.repositories.OrderRepository;
 import orderbook.domain.models.Asset;
 import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
+
 import orderbook.enuns.OrderType;
 import orderbook.exceptions.ExceptionOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +43,8 @@ public class OrderService {
         return orderRepository.findByOpenOrders();
     }
 
-    public List<Order> findOrdersOpenValidForMatch(Long customerId, OrderType orderType, BigDecimal price) {
-        return orderRepository.findByOpenValidForMatchOrders(customerId, orderType, price);
+    public List<Order> findOrdersOpenValidForMatch(Long customerId, OrderType orderType, BigDecimal price, Long assetId) {
+        return orderRepository.findByOpenValidForMatchOrders(customerId, orderType, price, assetId);
     }
 
     public Order findOrderById(Long id) {
@@ -81,7 +82,9 @@ public class OrderService {
                 findOrdersOpenValidForMatch(
                         order.getCustomer().getId(),
                         order.getOrderType(),
-                        order.getPrice()),
+                        order.getPrice(),
+                        order.getAsset().getId()),
+
                 order));
     }
 
@@ -146,8 +149,8 @@ public class OrderService {
                     walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
                     customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
                 } else {
-                    walletService.updateSellerWallet(orderInExecution.getCustomer().getId(), orderMatch);
-                    customerStockService.updateBuyerStockAsset(orderMatch.getCustomer(), orderMatch);
+                    walletService.updateSellerWallet(orderInExecution.getCustomer().getId(), orderInExecution);
+                    customerStockService.updateBuyerStockAsset(orderMatch.getCustomer(), orderInExecution);
                 }
             }
 
