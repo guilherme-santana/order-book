@@ -21,7 +21,7 @@ services:
     restart: always
     depends_on:
       - mysql
-    entrypoint: [ "/wait-for-it.sh", "mysql", "3306", "--", "java", "-jar", "app.jar" ]
+    entrypoint: [ "/wait-for-it.sh", "mysql:3306", "--", "java", "-jar", "app.jar" ]
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_book?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ORDER_BOOK_API_USER

@@ -34,4 +34,4 @@ RUN ./gradlew build
 COPY build/libs/*.jar app.jar
 
 # Define o comando padrão
-CMD ["java", "-jar", "app.jar", "./gradlew", "bootRun"]
+CMD ["java", "-jar", "app.jar"]
