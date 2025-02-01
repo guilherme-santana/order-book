@@ -16,6 +16,12 @@ RUN chmod 777 /wait-for-it.sh
 # INSTALA O NETCAT (nc) PARA O wait-for-it.sh FUNCIONAR
 RUN apt-get update && apt-get install -y netcat
 
+# Instalar dependências para build
+RUN apt-get update && apt-get install -y gradle
+
+# Executar o build do Gradle
+RUN ./gradlew build
+
 # Copia o arquivo JAR gerado pelo Gradle para dentro do container
 COPY build/libs/*.jar app.jar
 
