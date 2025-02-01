@@ -4,6 +4,14 @@ FROM openjdk:17-slim
 # Define o diretório de trabalho no container
 WORKDIR /app
 
+# Copiar o wrapper do Gradle e os arquivos do projeto
+COPY gradlew .
+COPY gradle ./gradle
+COPY . .
+
+# Tornar o wrapper executável
+RUN chmod +x gradlew
+
 # Copia os arquivos do projeto para dentro do container
 COPY . /app
 
@@ -26,4 +34,4 @@ RUN ./gradlew build
 COPY build/libs/*.jar app.jar
 
 # Define o comando padrão
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar", "./gradlew", "bootRun"]
