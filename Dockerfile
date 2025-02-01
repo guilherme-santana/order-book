@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y netcat
 RUN apt-get update && apt-get install -y gradle
 
 # Executar o build do Gradle
-RUN ./gradlew build --stacktrace || tail -n 100 build.gradle
+RUN ./gradlew build
 
 # Copia o arquivo JAR gerado pelo Gradle para dentro do container
 COPY build/libs/*.jar app.jar
