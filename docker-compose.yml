@@ -1,31 +1,15 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 098765
-      MYSQL_DATABASE: order_book
-      MYSQL_USER: ORDER_BOOK_API_USER
-      MYSQL_PASSWORD: 123456
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   app:
     build: .
     container_name: order-book-api
     restart: always
-    depends_on:
-      - mysql
-    entrypoint: [ "/wait-for-it.sh", "mysql:3306", "--", "java", "-jar", "app.jar" ]
+    entrypoint: [ "/wait-for-it.sh", "dpg-cufb2u5umphs73b16oeg-a.oregon-postgres.render.com", "5432", "--", "java", "-jar", "app.jar" ]
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/order_book?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: ORDER_BOOK_API_USER
-      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-cufb2u5umphs73b16oeg-a.oregon-postgres.render.com:5432/order_book_42al
+      SPRING_DATASOURCE_USERNAME: orde_book_user
+      SPRING_DATASOURCE_PASSWORD: wh9W9IbJBSjU0JyiwkTp8q2FFlQsI0ii
     ports:
       - "8080:8080"
 

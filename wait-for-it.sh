@@ -7,9 +7,9 @@ shift 2
 CMD=$@
 
 until nc -z $HOST $PORT; do
-  echo "Aguardando o MySQL... ($HOST:$PORT)"
+  echo "Aguardando o Banco... ($HOST:$PORT)"
   sleep 2
 done
 
-echo "MySQL está pronto!"
+echo "Banco está pronto!"
 exec $CMD

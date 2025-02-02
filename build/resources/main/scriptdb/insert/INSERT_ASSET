@@ -1,8 +1,7 @@
-INSERT INTO order_book.asset
-(id, description, name, symbol)
+INSERT INTO order_book_42al.public.asset (description, name, symbol)
 VALUES
-(0, 'Petrobras', 'Petrobras', 'PETR4'),
-(0, 'Vale S.A.', 'Vale', 'VALE3'),
-(0, 'Banco do Brasil', 'Banco do Brasil', 'BBAS3'),
-(0, 'Magazine Luiza', 'Magazine Luiza', 'MGLU3'),
-(0, 'Itaú Unibanco', 'Itaú', 'ITUB4');
+('Petrobras', 'Petrobras', 'PETR4'),
+('Vale S.A.', 'Vale', 'VALE3'),
+('Banco do Brasil', 'Banco do Brasil', 'BBAS3'),
+('Magazine Luiza', 'Magazine Luiza', 'MGLU3'),
+('Itaú Unibanco', 'Itaú', 'ITUB4');

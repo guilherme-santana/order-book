@@ -1,17 +1,12 @@
--- order_book.ordens definition
-
-CREATE TABLE `ordens` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `amount` int DEFAULT NULL,
-  `local_date_time` datetime(6) DEFAULT NULL,
-  `order_status` enum('CANCELED','EXECUTED','PENDING') DEFAULT NULL,
-  `order_type` enum('ASKS','BIDS') DEFAULT NULL,
-  `price` decimal(10,2) DEFAULT NULL,
-  `asset_id` bigint DEFAULT NULL,
-  `customer_id` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FKn9evoul2fgqbkp6e3nhb3idnq` (`asset_id`),
-  KEY `FKs7ynvu2q3huwpsry28l1rnfw8` (`customer_id`),
-  CONSTRAINT `FKn9evoul2fgqbkp6e3nhb3idnq` FOREIGN KEY (`asset_id`) REFERENCES `asset` (`id`),
-  CONSTRAINT `FKs7ynvu2q3huwpsry28l1rnfw8` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE ordens (
+  id BIGSERIAL PRIMARY KEY,
+  amount INT DEFAULT NULL,
+  local_date_time TIMESTAMP(6) DEFAULT NULL,
+  order_status VARCHAR(8) CHECK (order_status IN ('CANCELED', 'EXECUTED', 'PENDING')) DEFAULT NULL,
+  order_type VARCHAR(5) CHECK (order_type IN ('ASKS', 'BIDS')) DEFAULT NULL,
+  price DECIMAL(10,2) DEFAULT NULL,
+  asset_id BIGINT DEFAULT NULL,
+  customer_id BIGINT DEFAULT NULL,
+  CONSTRAINT fk_asset FOREIGN KEY (asset_id) REFERENCES asset(id),
+  CONSTRAINT fk_customer FOREIGN KEY (customer_id) REFERENCES customer(id)
+);

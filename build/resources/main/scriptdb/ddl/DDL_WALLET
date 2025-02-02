@@ -1,10 +1,7 @@
--- order_book.wallet definition
-
-CREATE TABLE `wallet` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `balance` decimal(10,2) DEFAULT NULL,
-  `customer_id` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UKnrmo7cuqx3a012rinnyqsmnxh` (`customer_id`),
-  CONSTRAINT `FKpb5ltxtks766lq2b9hgvnr2bq` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE wallet (
+  id BIGSERIAL PRIMARY KEY,
+  balance DECIMAL(10,2) DEFAULT NULL,
+  customer_id BIGINT DEFAULT NULL,
+  CONSTRAINT unique_customer_id UNIQUE (customer_id),
+  CONSTRAINT fk_customer FOREIGN KEY (customer_id) REFERENCES customer(id)
+);
