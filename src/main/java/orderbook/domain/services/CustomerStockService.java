@@ -107,7 +107,6 @@ public class CustomerStockService {
 
     public void updateBuyerStockAsset(Customer buyer, Order order) {
         CustomerStock stockBuyer = findByCustomerAndAsset(buyer.getId(), order.getAsset().getId());
-        log.info("M=updateBuyerStockAsset, asset = {}, amount = {}, customerId = {}", stockBuyer.getAsset().getName(), stockBuyer.getAmount(), stockBuyer.getCustomer().getId());
 
         if (stockBuyer == null) {
             createStockAsset(buyer, assetsService.findAssetsById(order.getAsset().getId()), order.getAmount());
