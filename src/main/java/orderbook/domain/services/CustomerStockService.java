@@ -6,12 +6,16 @@ import orderbook.domain.models.Customer;
 import orderbook.domain.models.CustomerStock;
 import orderbook.domain.models.Order;
 import orderbook.exceptions.ExceptionOrder;
+import orderbook.exceptions.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static orderbook.exceptions.Messages.ATIVO_NAO_ENCONTRADO;
+import static orderbook.exceptions.Messages.QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO;
 
 @Service
 public class CustomerStockService {
@@ -47,17 +51,17 @@ public class CustomerStockService {
 
     public void createTransactionAskAsset(Order order) {
         CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
-        log.info("M=createTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
         if (stock == null) {
-            throw new ExceptionOrder("Ativo não encontrado!");
+            throw new ExceptionOrder(ATIVO_NAO_ENCONTRADO);
         }
+        log.info("M=createTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
         Integer actualAmount = stock.getAmount();
         Integer orderAmount = order.getAmount();
 
         if (actualAmount < orderAmount) {
-            throw new ExceptionOrder("Quantidade de ativo não suficiente para realizar a operação!");
+            throw new ExceptionOrder(QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO);
         }
 
         int amount = actualAmount - orderAmount;
@@ -70,17 +74,17 @@ public class CustomerStockService {
 
     public void updateTransactionAskAsset(Order order, OrderRequest orderRequest) {
         CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
-        log.info("M=updateTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
         if (stock == null) {
-            throw new ExceptionOrder("Ativo não encontrado!");
+            throw new ExceptionOrder(ATIVO_NAO_ENCONTRADO);
         }
+        log.info("M=updateTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
         Integer realAmount = stock.getAmount() + order.getAmount();
         Integer newOrderAmount = orderRequest.getAmount();
 
         if (realAmount < newOrderAmount) {
-            throw new ExceptionOrder("Quantidade de ativo não suficiente para realizar a operação!");
+            throw new ExceptionOrder(QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO);
         }
 
         int amount = realAmount - newOrderAmount;
@@ -93,6 +97,11 @@ public class CustomerStockService {
 
     public void cancellTransactionAskAsset(Order order) {
         CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
+
+        if (stock == null) {
+            throw new ExceptionOrder(ATIVO_NAO_ENCONTRADO);
+        }
+
         log.info("M=cancellTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
         Integer actualAmount = stock.getAmount();

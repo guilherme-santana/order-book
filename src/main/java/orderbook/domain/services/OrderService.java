@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static orderbook.enuns.OrderStatus.*;
+import static orderbook.exceptions.Messages.*;
 
 @Service
 public class OrderService {
@@ -68,10 +69,10 @@ public class OrderService {
         Asset asset = assetsService.findAssetsById(orderRequest.getAssetId());
 
         if (customer == null) {
-            throw new ExceptionOrder("Cliente inválido");
+            throw new ExceptionOrder(CLIENTE_INVALIDO);
         }
         if (asset == null) {
-            throw new ExceptionOrder("Ativo inválido");
+            throw new ExceptionOrder(ATIVO_INVALIDO);
         }
 
         Order order = new Order(
@@ -110,7 +111,7 @@ public class OrderService {
                 orderRequest.getAmount()
         );
         if (order.getOrderStatus() != PENDING) {
-            throw new ExceptionOrder("Ordens executadas ou canceladas não podem ser alteradas!");
+            throw new ExceptionOrder(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
         }
 
         if (order.getOrderType().equals(OrderType.BIDS)) {
@@ -130,7 +131,7 @@ public class OrderService {
         Order order = findOrderById(id);
 
         if (order.getOrderStatus() != PENDING) {
-            throw new ExceptionOrder("Ordens executadas ou canceladas não podem ser alteradas!");
+            throw new ExceptionOrder(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
         }
 
         if (order.getOrderType().equals(OrderType.BIDS)) {

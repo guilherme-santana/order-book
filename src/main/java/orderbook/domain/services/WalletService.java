@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+import static orderbook.exceptions.Messages.SALDO_INSUFICIENTE;
+
 @Service
 public class WalletService {
     private static final Logger log = LoggerFactory.getLogger(WalletService.class);
@@ -35,7 +37,7 @@ public class WalletService {
         BigDecimal orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount));
 
         if(actualBalance.compareTo(orderPrice) < 0){
-            throw new ExceptionOrder("Saldo insuficiente!");
+            throw new ExceptionOrder(SALDO_INSUFICIENTE);
         }
 
         BigDecimal balance = actualBalance.subtract(orderPrice);
@@ -59,7 +61,7 @@ public class WalletService {
         BigDecimal newOrderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
 
         if(realBalance.compareTo(newOrderPrice) < 0){
-            throw new ExceptionOrder("Saldo insuficiente!");
+            throw new ExceptionOrder(SALDO_INSUFICIENTE);
         }
 
         BigDecimal balance = realBalance.subtract(newOrderPrice);

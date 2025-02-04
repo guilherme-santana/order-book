@@ -6,6 +6,7 @@ import orderbook.domain.services.AssetsService;
 import orderbook.domain.services.OrderRequest;
 import orderbook.domain.services.OrderResponse;
 import orderbook.domain.services.OrderService;
+import orderbook.exceptions.ErrorResponse;
 import orderbook.exceptions.ExceptionOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,19 +31,9 @@ public class OrderController {
         this.assetsService = assetsService;
     }
 
-    @GetMapping
-    public List<Order> findAllOrders() {
-        return orderService.findAllOrders();
-    }
-
     @GetMapping("/open")
     public List<Order> findByOpenOrders() {
         return orderService.findByOpenOrders();
-    }
-
-    @GetMapping("/{id}")
-    public Order findOrderById(@PathVariable Long id) {
-        return orderService.findOrderById(id);
     }
 
     @PostMapping
@@ -66,10 +57,7 @@ public class OrderController {
                     .body(response);
         } catch (Exception e) {
             log.error("M=createNewOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
-
+            return ErrorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -95,8 +83,7 @@ public class OrderController {
                     .body(response);
         } catch (Exception e) {
             log.error("M=updateOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
+            return ErrorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -109,8 +96,7 @@ public class OrderController {
                     .body(null);
         } catch (Exception e) {
             log.error("M=cancelOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
+            return ErrorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
