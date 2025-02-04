@@ -7,7 +7,6 @@ import orderbook.domain.services.OrderRequest;
 import orderbook.domain.services.OrderResponse;
 import orderbook.domain.services.OrderService;
 import orderbook.exceptions.ErrorResponse;
-import orderbook.exceptions.ExceptionOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +23,13 @@ public class OrderController {
 
     private final OrderService orderService;
     private final AssetsService assetsService;
+    private final ErrorResponse errorResponse;
 
     @Autowired
-    public OrderController(OrderService orderService, AssetsService assetsService) {
+    public OrderController(OrderService orderService, AssetsService assetsService, ErrorResponse errorResponse) {
         this.orderService = orderService;
         this.assetsService = assetsService;
+        this.errorResponse = errorResponse;
     }
 
     @GetMapping("/open")
@@ -57,7 +58,7 @@ public class OrderController {
                     .body(response);
         } catch (Exception e) {
             log.error("M=createNewOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
-            return ErrorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return errorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -83,7 +84,7 @@ public class OrderController {
                     .body(response);
         } catch (Exception e) {
             log.error("M=updateOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
-            return ErrorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return errorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -96,7 +97,7 @@ public class OrderController {
                     .body(null);
         } catch (Exception e) {
             log.error("M=cancelOrder, statusCode = {}, error = {}", HttpStatus.BAD_REQUEST, e.getMessage());
-            return ErrorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return errorResponse.generateErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
