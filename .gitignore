@@ -9,9 +9,6 @@
 */logs
 # BlueJ files
 *.ctxt
-build/resources/main/logback.xml
-build/resources/main/scriptdb/
-build/tmp/
 
 
 # Mobile Tools for Java (J2ME)

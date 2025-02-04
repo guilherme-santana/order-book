@@ -1,0 +1,12 @@
+INSERT INTO order_book_42al.public.customer (document, name)
+VALUES
+(03394837, 'James Bond'),
+(12345678, 'Indiana Jones'),
+(98765432, 'Luke Skywalker'),
+(45612378, 'Harry Potter'),
+(78945612, 'Darth Vader'),
+(32165498, 'Forrest Gump'),
+(65498732, 'Jack Sparrow'),
+(15935748, 'Rocky Balboa'),
+(75395185, 'Tony Stark'),
+(85245675, 'Neo');

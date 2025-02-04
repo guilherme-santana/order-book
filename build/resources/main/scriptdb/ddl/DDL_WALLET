@@ -1,0 +1,7 @@
+CREATE TABLE wallet (
+  id BIGSERIAL PRIMARY KEY,
+  balance DECIMAL(10,2) DEFAULT NULL,
+  customer_id BIGINT DEFAULT NULL,
+  CONSTRAINT unique_customer_id UNIQUE (customer_id),
+  CONSTRAINT fk_customer FOREIGN KEY (customer_id) REFERENCES customer(id)
+);

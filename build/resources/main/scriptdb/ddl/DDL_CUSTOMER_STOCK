@@ -1,0 +1,8 @@
+CREATE TABLE customer_stock (
+  id BIGSERIAL PRIMARY KEY,
+  amount INT DEFAULT NULL,
+  asset_id BIGINT DEFAULT NULL,
+  customer_id BIGINT DEFAULT NULL,
+  CONSTRAINT fk_customer FOREIGN KEY (customer_id) REFERENCES customer (id),
+  CONSTRAINT fk_asset FOREIGN KEY (asset_id) REFERENCES asset (id)
+);
