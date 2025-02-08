@@ -1,24 +1,22 @@
 package orderbook.domain.services;
 
+import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.OrderRepository;
-import orderbook.domain.models.Asset;
-import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
-
 import orderbook.enuns.OrderType;
-import orderbook.exceptions.ExceptionOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static orderbook.dataprovider.exceptions.Messages.NENHUMA_ORDEM_ENCONTRADA;
+import static orderbook.dataprovider.exceptions.Messages.ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS;
 import static orderbook.enuns.OrderStatus.*;
-import static orderbook.exceptions.Messages.*;
+
 
 @Service
 public class OrderService {
@@ -53,7 +51,8 @@ public class OrderService {
     }
 
     public Order findOrderById(Long id) {
-        return orderRepository.findById(id).orElseThrow();
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(NENHUMA_ORDEM_ENCONTRADA));
     }
 
     public Order createNewOrder(OrderRequest orderRequest) {
@@ -65,17 +64,10 @@ public class OrderService {
                 orderRequest.getAmount()
         );
 
-        Customer customer = customerService.findCustomerById(orderRequest.getCustomerId());
-        Asset asset = assetsService.findAssetsById(orderRequest.getAssetId());
+        var customer = customerService.findCustomerById(orderRequest.getCustomerId());
+        var asset = assetsService.findAssetsById(orderRequest.getAssetId());
 
-        if (customer == null) {
-            throw new ExceptionOrder(CLIENTE_INVALIDO);
-        }
-        if (asset == null) {
-            throw new ExceptionOrder(ATIVO_INVALIDO);
-        }
-
-        Order order = new Order(
+        var order = new Order(
                 customer,
                 orderRequest.getOrderType(),
                 orderRequest.getPrice(),
@@ -85,33 +77,32 @@ public class OrderService {
                 asset
         );
 
-        if (order.getOrderType().equals(OrderType.BIDS)) {
+        if (OrderType.BIDS.equals(order.getOrderType())) {
             walletService.createTransactionBidWallet(order);
-        } else if (order.getOrderType().equals(OrderType.ASKS)) {
+        } else if (OrderType.ASKS.equals(order.getOrderType())) {
             customerStockService.createTransactionAskAsset(order);
         }
 
-        return orderRepository.save(executeOrder(
-                findOrdersOpenValidForMatch(
-                        order.getCustomer().getId(),
-                        order.getOrderType(),
-                        order.getPrice(),
-                        order.getAsset().getId()),
+        var orderValidMatch = findOrdersOpenValidForMatch(
+                order.getCustomer().getId(),
+                order.getOrderType(),
+                order.getPrice(),
+                order.getAsset().getId());
 
-                order));
+        return orderRepository.save(executeOrder(orderValidMatch,order));
     }
 
-    public Order updateOrder(Long id, OrderRequest orderRequest) {
-        Order order = findOrderById(id);
+    public Order updateOrder(Long id, OrderUpdateRequest orderRequest) {
+        var order = findOrderById(id);
         log.info("M=updateOrder, assetId = {}, customerId = {}, orderType = {}, price = {}, amount = {} ",
-                orderRequest.getAssetId(),
-                orderRequest.getCustomerId(),
-                orderRequest.getOrderType(),
-                orderRequest.getPrice(),
-                orderRequest.getAmount()
+                order.getAsset().getId(),
+                order.getCustomer().getId(),
+                order.getOrderType(),
+                order.getPrice(),
+                order.getAmount()
         );
         if (order.getOrderStatus() != PENDING) {
-            throw new ExceptionOrder(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
+            throw new BusinessException(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
         }
 
         if (order.getOrderType().equals(OrderType.BIDS)) {
@@ -128,10 +119,10 @@ public class OrderService {
     }
 
     public void cancelOrder(Long id) {
-        Order order = findOrderById(id);
+        var order = findOrderById(id);
 
         if (order.getOrderStatus() != PENDING) {
-            throw new ExceptionOrder(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
+            throw new BusinessException(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
         }
 
         if (order.getOrderType().equals(OrderType.BIDS)) {
@@ -147,30 +138,28 @@ public class OrderService {
     }
 
     private Order executeOrder(List<Order> ordersMatch, Order orderInExecution) {
-        int originalAmountOrder = orderInExecution.getAmount();
+        var originalAmountOrder = orderInExecution.getAmount();
         if (!ordersMatch.isEmpty()) {
 
             for (Order orderMatch : ordersMatch) {
 
                 if (orderInExecution.getOrderStatus() == PENDING) {
 
-                    if (orderMatch.getAmount() - orderInExecution.getAmount() == 0) {
+                    if (orderInExecution.getAmount() > orderMatch.getAmount()) {
+                        executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(orderMatch, orderInExecution);
+                    } else if (orderInExecution.getAmount() < orderMatch.getAmount()) {
+                        executeOrderWhenOrderInExecutionIsLessThanOrderMatch(orderMatch, orderInExecution);
+                    } else {
                         executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(orderMatch, orderInExecution);
                     }
 
-                    if (orderInExecution.getAmount() > orderMatch.getAmount()) {
-                        executeOrderWhenOrderInExecutionIsGreaterThanOrderMatch(orderMatch, orderInExecution);
-
-                    } else if (orderInExecution.getAmount() < orderMatch.getAmount()) {
-                        executeOrderWhenOrderInExecutionIsLessThanOrderMatch(orderMatch, orderInExecution);
+                    if (orderInExecution.getOrderType().equals(OrderType.BIDS)) {
+                        walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
+                        customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
+                    } else {
+                        walletService.updateSellerWallet(orderInExecution.getCustomer().getId(), orderInExecution);
+                        customerStockService.updateBuyerStockAsset(orderMatch.getCustomer(), orderInExecution);
                     }
-                }
-                if (orderInExecution.getOrderType().equals(OrderType.BIDS)) {
-                    walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
-                    customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
-                } else {
-                    walletService.updateSellerWallet(orderInExecution.getCustomer().getId(), orderInExecution);
-                    customerStockService.updateBuyerStockAsset(orderMatch.getCustomer(), orderInExecution);
                 }
             }
 

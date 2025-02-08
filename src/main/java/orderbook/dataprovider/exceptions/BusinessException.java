@@ -1,2 +1,7 @@
-package orderbook.dataprovider.exceptions;public class BusinessException {
+package orderbook.dataprovider.exceptions;
+
+public class BusinessException extends RuntimeException {
+    public BusinessException(String message) {
+        super(message);
+    }
 }

@@ -1,4 +1,4 @@
-package orderbook.exceptions;
+package orderbook.dataprovider.exceptions;
 
 public class Messages {
 

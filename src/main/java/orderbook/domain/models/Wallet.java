@@ -1,9 +1,11 @@
 package orderbook.domain.models;
 
 import jakarta.persistence.*;
-import orderbook.exceptions.ExceptionOrder;
+import orderbook.dataprovider.exceptions.BusinessException;
 
 import java.math.BigDecimal;
+
+import static orderbook.dataprovider.exceptions.Messages.SALDO_INSUFICIENTE;
 
 @Entity
 @Table(name = "wallet")
@@ -54,7 +56,7 @@ public class Wallet {
 
     public void updateBalance(BigDecimal value) {
         if (value.compareTo(BigDecimal.ZERO) < 0){
-            throw new ExceptionOrder("Saldo menor que zero!");
+            throw new BusinessException(SALDO_INSUFICIENTE);
         }
         setBalance(value);
     }

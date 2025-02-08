@@ -1,17 +1,34 @@
 package orderbook.domain.services;
 
-import orderbook.enuns.OrderStatus;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.enuns.OrderType;
 
 import java.math.BigDecimal;
 
+import static orderbook.dataprovider.exceptions.Messages.*;
+
 public class OrderRequest {
+    @NotNull(message = ASSET_ID_DEVE_SER_INFORMADO)
+    @Min(value = 1, message = ASSET_INVALIDO)
     private Long assetId;
+
+    @NotNull(message = CUSTOMER_ID_DEVE_SER_INFORMADO)
+    @Min(value = 1, message = CUSTOMER_INVALIDO)
     private Long customerId;
+
+    @NotNull(message = ORDER_TYPE_DEVE_SER_INFORMADO)
     private OrderType orderType;
-    private Double price;
+
+    @NotNull(message = PRICE_DEVE_SER_INFORMADO)
+    @DecimalMin(value = "0.01", inclusive = true, message = "price deve ser maior que zero")
+    private BigDecimal price;
+
+    @NotNull(message = AMOUNT_DEVE_SER_INFORMADO)
+    @Min(value = 1, message = "amount deve ser maior que zero")
     private Integer amount;
-    private OrderStatus orderStatus;
 
     public Long getAssetId() {
         return assetId;
@@ -38,10 +55,13 @@ public class OrderRequest {
     }
 
     public BigDecimal getPrice() {
-        return BigDecimal.valueOf(price);
+        return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException(PRICE_NAO_PODE_SER_MENOR_IGUAL_A_ZERO);
+        }
         this.price = price;
     }
 
@@ -50,14 +70,10 @@ public class OrderRequest {
     }
 
     public void setAmount(Integer amount) {
+        if (amount <= 0) {
+            throw new BusinessException(AMOUNT_NAO_PODE_SER_MENOR_IGUAL_A_ZERO);
+        }
         this.amount = amount;
     }
 
-    public OrderStatus getOrderStatus() {
-        return orderStatus;
-    }
-
-    public void setOrderStatus(OrderStatus orderStatus) {
-        this.orderStatus = orderStatus;
-    }
 }

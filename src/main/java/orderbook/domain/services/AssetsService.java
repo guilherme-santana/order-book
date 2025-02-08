@@ -1,11 +1,14 @@
 package orderbook.domain.services;
 
+import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.AssetRepository;
 import orderbook.domain.models.Asset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static orderbook.dataprovider.exceptions.Messages.ATIVO_INVALIDO;
 
 @Service
 public class AssetsService {
@@ -23,7 +26,8 @@ public class AssetsService {
     }
 
     public Asset findAssetsById(Long id){
-        return assetRepository.findById(id).orElseThrow();
+        return assetRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ATIVO_INVALIDO));
     }
 
 

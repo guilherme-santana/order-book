@@ -1,5 +1,5 @@
 # Usa uma imagem do JDK como base
-FROM openjdk:17-slim
+FROM openjdk:21-slim
 
 # Define o diretório de trabalho no container
 WORKDIR /app

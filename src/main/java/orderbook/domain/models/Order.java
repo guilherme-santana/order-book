@@ -39,13 +39,13 @@ public class Order {
     public Order() {}
 
     public Order(
-                 Customer customer,
-                 OrderType orderType,
-                 BigDecimal price,
-                 Integer amount,
-                 OrderStatus orderStatus,
-                 LocalDateTime localDateTime,
-                 Asset asset) {
+            Customer customer,
+            OrderType orderType,
+            BigDecimal price,
+            Integer amount,
+            OrderStatus orderStatus,
+            LocalDateTime localDateTime,
+            Asset asset) {
         this.customer = customer;
         this.orderType = orderType;
         this.price = price;

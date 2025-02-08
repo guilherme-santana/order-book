@@ -1,21 +1,21 @@
 package orderbook.domain.services;
 
+import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.CustomerStockRepository;
 import orderbook.domain.models.Asset;
 import orderbook.domain.models.Customer;
 import orderbook.domain.models.CustomerStock;
 import orderbook.domain.models.Order;
-import orderbook.exceptions.ExceptionOrder;
-import orderbook.exceptions.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-import static orderbook.exceptions.Messages.ATIVO_NAO_ENCONTRADO;
-import static orderbook.exceptions.Messages.QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO;
+import static orderbook.dataprovider.exceptions.Messages.ATIVO_INVALIDO;
+import static orderbook.dataprovider.exceptions.Messages.QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO;
 
 @Service
 public class CustomerStockService {
@@ -32,17 +32,20 @@ public class CustomerStockService {
     }
 
     public List<CustomerStock> findCustomerStockByCustomerId(Long customerId) {
-        return customerStockRepository.findByCustomerID(customerId);
+        return customerStockRepository.findByCustomerID(customerId)
+                .orElseThrow(() -> new BusinessException(ATIVO_INVALIDO));
     }
 
     public CustomerStock findByCustomerAndAsset(Long customerId, Long assetId) {
-        return customerStockRepository.findByCustomerIdAndAssetId(customerId, assetId);
+        return customerStockRepository.findByCustomerIdAndAssetId(customerId, assetId)
+                .orElseThrow(() -> new BusinessException(ATIVO_INVALIDO));
     }
 
-    public void createStockAsset(Customer customer, Asset asset, Integer amount) {
-        CustomerStock customerStock = new CustomerStock(customer, asset, amount);
+    public CustomerStock createStockAsset(Customer customer, Asset asset, Integer amount) {
+        var customerStock = new CustomerStock(customer, asset, amount);
         log.info("M=createStockAsset, asset = {}, amount = {}, customerId = {}", customerStock.getAsset().getName(), customerStock.getAmount(), customerStock.getCustomer().getId());
         customerStockRepository.save(customerStock);
+        return customerStock;
     }
 
     public void deleteStockAsset(Long customerId, Long assetId) {
@@ -50,21 +53,19 @@ public class CustomerStockService {
     }
 
     public void createTransactionAskAsset(Order order) {
-        CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
+        var stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
 
-        if (stock == null) {
-            throw new ExceptionOrder(ATIVO_NAO_ENCONTRADO);
-        }
+
         log.info("M=createTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
-        Integer actualAmount = stock.getAmount();
-        Integer orderAmount = order.getAmount();
+        var actualAmount = stock.getAmount();
+        var orderAmount = order.getAmount();
 
         if (actualAmount < orderAmount) {
-            throw new ExceptionOrder(QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO);
+            throw new BusinessException(QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO);
         }
 
-        int amount = actualAmount - orderAmount;
+        var amount = actualAmount - orderAmount;
         stock.updateAmount(amount);
         log.info("M=createTransactionAskAsset, asset = {}, newAmount = {}, customerId = {}", stock.getAsset().getName(), amount, stock.getCustomer().getId());
 
@@ -72,22 +73,19 @@ public class CustomerStockService {
 
     }
 
-    public void updateTransactionAskAsset(Order order, OrderRequest orderRequest) {
-        CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
+    public void updateTransactionAskAsset(Order order, OrderUpdateRequest orderRequest) {
+        var stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
 
-        if (stock == null) {
-            throw new ExceptionOrder(ATIVO_NAO_ENCONTRADO);
-        }
         log.info("M=updateTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
-        Integer realAmount = stock.getAmount() + order.getAmount();
-        Integer newOrderAmount = orderRequest.getAmount();
+        var realAmount = stock.getAmount() + order.getAmount();
+        var newOrderAmount = orderRequest.getAmount();
 
         if (realAmount < newOrderAmount) {
-            throw new ExceptionOrder(QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO);
+            throw new BusinessException(QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO);
         }
 
-        int amount = realAmount - newOrderAmount;
+        var amount = realAmount - newOrderAmount;
         stock.updateAmount(amount);
         log.info("M=updateTransactionAskAsset, asset = {}, newAmount = {}, customerId = {}", stock.getAsset().getName(), amount, stock.getCustomer().getId());
 
@@ -96,18 +94,14 @@ public class CustomerStockService {
     }
 
     public void cancellTransactionAskAsset(Order order) {
-        CustomerStock stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
-
-        if (stock == null) {
-            throw new ExceptionOrder(ATIVO_NAO_ENCONTRADO);
-        }
+        var stock = findByCustomerAndAsset(order.getCustomer().getId(), order.getAsset().getId());
 
         log.info("M=cancellTransactionAskAsset, asset = {}, amount = {}, customerId = {}", stock.getAsset().getName(), stock.getAmount(), stock.getCustomer().getId());
 
-        Integer actualAmount = stock.getAmount();
-        Integer orderAmount = order.getAmount();
+        var actualAmount = stock.getAmount();
+        var orderAmount = order.getAmount();
 
-        Integer amount = actualAmount + orderAmount;
+        var amount = actualAmount + orderAmount;
         stock.updateAmount(amount);
         log.info("M=cancellTransactionAskAsset, asset = {}, newAmount = {}, customerId = {}", stock.getAsset(), amount, stock.getCustomer().getId());
 
@@ -115,17 +109,21 @@ public class CustomerStockService {
     }
 
     public void updateBuyerStockAsset(Customer buyer, Order order) {
-        CustomerStock stockBuyer = findByCustomerAndAsset(buyer.getId(), order.getAsset().getId());
+        var stockBuyer = findByCustomerAndAsset(buyer.getId(), order.getAsset().getId());
 
-        if (stockBuyer == null) {
-            createStockAsset(buyer, assetsService.findAssetsById(order.getAsset().getId()), order.getAmount());
-        } else {
-            int newAmount = stockBuyer.getAmount() + order.getAmount();
-            stockBuyer.updateAmount(newAmount);
-            log.info("M=updateBuyerStockAsset, asset = {}, newAmount = {}, customerId = {}", stockBuyer.getAsset().getName(), newAmount, stockBuyer.getCustomer().getId());
+        Optional.ofNullable(stockBuyer).orElse(
+                createStockAsset(
+                        buyer,
+                        order.getAsset(),
+                        order.getAmount()
+                )
+        );
 
-            customerStockRepository.save(stockBuyer);
-        }
+        var newAmount = stockBuyer.getAmount() + order.getAmount();
+        stockBuyer.updateAmount(newAmount);
+        log.info("M=updateBuyerStockAsset, asset = {}, newAmount = {}, customerId = {}", stockBuyer.getAsset().getName(), newAmount, stockBuyer.getCustomer().getId());
+
+        customerStockRepository.save(stockBuyer);
     }
 
 }

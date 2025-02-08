@@ -1,7 +1,7 @@
 package orderbook.domain.models;
 
 import jakarta.persistence.*;
-import orderbook.exceptions.ExceptionOrder;
+import orderbook.dataprovider.exceptions.BusinessException;
 
 @Entity
 @Table(name = "customer_stock")
@@ -64,7 +64,7 @@ public class CustomerStock {
 
     public void updateAmount(Integer amount) {
         if (amount < 0){
-            throw new ExceptionOrder("Quantidade negativa!");
+            throw new BusinessException("Quantidade negativa!");
         }
         setAmount(amount);
     }

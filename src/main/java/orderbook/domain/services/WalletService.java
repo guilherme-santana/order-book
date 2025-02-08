@@ -1,9 +1,9 @@
 package orderbook.domain.services;
 
+import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.WalletRepository;
 import orderbook.domain.models.Order;
 import orderbook.domain.models.Wallet;
-import orderbook.exceptions.ExceptionOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-import static orderbook.exceptions.Messages.SALDO_INSUFICIENTE;
+import static orderbook.dataprovider.exceptions.Messages.DADO_NAO_ENCONTRADO;
+import static orderbook.dataprovider.exceptions.Messages.SALDO_INSUFICIENTE;
 
 @Service
 public class WalletService {
@@ -25,22 +26,23 @@ public class WalletService {
     }
 
     public Wallet findWalletByCustomerId(Long id){
-            return walletRepository.findByCustomerID(id);
+            return walletRepository.findByCustomerID(id)
+                    .orElseThrow(() -> new IllegalArgumentException(DADO_NAO_ENCONTRADO));
     }
 
 
     public void createTransactionBidWallet(Order order){
-        Wallet wallet = findWalletByCustomerId(order.getCustomer().getId());
+        var wallet = findWalletByCustomerId(order.getCustomer().getId());
         log.info("M=createTransactionBidWallet, balance = {}, customerId = {}", wallet.getBalance(), wallet.getCustomer().getId());
-        BigDecimal actualBalance = wallet.getBalance();
-        Integer amount = order.getAmount();
-        BigDecimal orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount));
+        var actualBalance = wallet.getBalance();
+        var amount = order.getAmount();
+        var orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount)); // order
 
-        if(actualBalance.compareTo(orderPrice) < 0){
-            throw new ExceptionOrder(SALDO_INSUFICIENTE);
+        if(actualBalance.compareTo(orderPrice) < 0){     //wallet
+            throw new BusinessException(SALDO_INSUFICIENTE);
         }
 
-        BigDecimal balance = actualBalance.subtract(orderPrice);
+        var balance = actualBalance.subtract(orderPrice); //wallet
 
         wallet.updateBalance(balance);
         log.info("M=createTransactionBidWallet, newBalance = {}, customerId = {}", balance, wallet.getCustomer().getId());
@@ -48,23 +50,23 @@ public class WalletService {
         walletRepository.save(wallet);
     }
 
-    public void updateTransactionBidWallet(Order order, OrderRequest orderRequest){
-        BigDecimal originalPrice = order.getOriginalprice(order);
+    public void updateTransactionBidWallet(Order order, OrderUpdateRequest orderRequest){
+        var originalPrice = order.getOriginalprice(order);
 
-        Wallet wallet = findWalletByCustomerId(order.getCustomer().getId());
+        var wallet = findWalletByCustomerId(order.getCustomer().getId());
         log.info("M=updateTransactionBidWallet, balance = {}, customerId = {}", wallet.getBalance(), wallet.getCustomer().getId());
 
-        BigDecimal actualBalance = wallet.getBalance();
-        BigDecimal realBalance = actualBalance.add(originalPrice);
+        var actualBalance = wallet.getBalance();
+        var realBalance = actualBalance.add(originalPrice);
 
-        Integer amount = orderRequest.getAmount();
-        BigDecimal newOrderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
+        var amount = orderRequest.getAmount();
+        var newOrderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
 
         if(realBalance.compareTo(newOrderPrice) < 0){
-            throw new ExceptionOrder(SALDO_INSUFICIENTE);
+            throw new BusinessException(SALDO_INSUFICIENTE);
         }
 
-        BigDecimal balance = realBalance.subtract(newOrderPrice);
+        var balance = realBalance.subtract(newOrderPrice);
         wallet.updateBalance(balance);
         log.info("M=updateTransactionBidWallet, newBalance = {}, customerId = {}", balance, wallet.getCustomer().getId());
 
@@ -72,14 +74,14 @@ public class WalletService {
     }
 
     public void cancellTransactionBidWallet(Order order){
-        Wallet wallet = findWalletByCustomerId(order.getCustomer().getId());
+        var wallet = findWalletByCustomerId(order.getCustomer().getId());
         log.info("M=cancellTransactionBidWallet, balance = {}, customerId = {}", wallet.getBalance(), wallet.getCustomer().getId());
 
-        BigDecimal actualBalance = wallet.getBalance();
-        Integer amount = order.getAmount();
-        BigDecimal orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount));
+        var actualBalance = wallet.getBalance();
+        var amount = order.getAmount();
+        var orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount));
 
-        BigDecimal balance = actualBalance.add(orderPrice);
+        var balance = actualBalance.add(orderPrice);
         wallet.updateBalance(balance);
         log.info("M=cancellTransactionBidWallet, newBalance = {}, customerId = {}", balance, wallet.getCustomer().getId());
 
@@ -87,10 +89,10 @@ public class WalletService {
     }
 
     public void updateSellerWallet(Long sellerId, Order order){
-        Wallet sellerWallet = findWalletByCustomerId(sellerId);
+        var sellerWallet = findWalletByCustomerId(sellerId);
         log.info("M=updateSellerWallet, balance = {}, customerId = {}", sellerWallet.getBalance(), sellerWallet.getCustomer().getId());
 
-        BigDecimal newValue = sellerWallet.getBalance().add(order.getOriginalprice(order));
+        var newValue = sellerWallet.getBalance().add(order.getOriginalprice(order));
 
         sellerWallet.updateBalance(newValue);
         log.info("M=updateSellerWallet, newBalance = {}, customerId = {}", newValue, sellerWallet.getCustomer().getId());
