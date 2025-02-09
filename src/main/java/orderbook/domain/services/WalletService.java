@@ -2,6 +2,7 @@ package orderbook.domain.services;
 
 import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.WalletRepository;
+import orderbook.domain.messages.Messages;
 import orderbook.domain.models.Order;
 import orderbook.domain.models.Wallet;
 import org.slf4j.Logger;
@@ -11,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-import static orderbook.domain.messages.Messages.DADO_NAO_ENCONTRADO;
-import static orderbook.domain.messages.Messages.SALDO_INSUFICIENTE;
 
 @Service
 public class WalletService {
@@ -27,7 +26,7 @@ public class WalletService {
 
     public Wallet findWalletByCustomerId(Long id){
             return walletRepository.findByCustomerID(id)
-                    .orElseThrow(() -> new IllegalArgumentException(DADO_NAO_ENCONTRADO));
+                    .orElseThrow(() -> new IllegalArgumentException(Messages.DADO_NAO_ENCONTRADO));
     }
 
 
@@ -39,7 +38,7 @@ public class WalletService {
         var orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount)); // order
 
         if(actualBalance.compareTo(orderPrice) < 0){     //wallet
-            throw new BusinessException(SALDO_INSUFICIENTE);
+            throw new BusinessException(Messages.SALDO_INSUFICIENTE);
         }
 
         var balance = actualBalance.subtract(orderPrice); //wallet
@@ -63,7 +62,7 @@ public class WalletService {
         var newOrderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
 
         if(realBalance.compareTo(newOrderPrice) < 0){
-            throw new BusinessException(SALDO_INSUFICIENTE);
+            throw new BusinessException(Messages.SALDO_INSUFICIENTE);
         }
 
         var balance = realBalance.subtract(newOrderPrice);

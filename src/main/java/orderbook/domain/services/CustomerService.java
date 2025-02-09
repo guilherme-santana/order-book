@@ -2,13 +2,13 @@ package orderbook.domain.services;
 
 import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.CustomerRepository;
+import orderbook.domain.messages.Messages;
 import orderbook.domain.models.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static orderbook.domain.messages.Messages.CLIENTE_INVALIDO;
 
 @Service
 public class CustomerService {
@@ -27,7 +27,7 @@ public class CustomerService {
 
     public Customer findCustomerById(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(CLIENTE_INVALIDO));
+                .orElseThrow(() -> new BusinessException(Messages.CLIENTE_INVALIDO));
     }
 
 

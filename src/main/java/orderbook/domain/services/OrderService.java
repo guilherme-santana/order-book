@@ -2,6 +2,7 @@ package orderbook.domain.services;
 
 import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.OrderRepository;
+import orderbook.domain.messages.Messages;
 import orderbook.domain.models.Order;
 import orderbook.enuns.OrderType;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static orderbook.domain.messages.Messages.*;
 import static orderbook.enuns.OrderStatus.*;
 
 
@@ -54,7 +54,7 @@ public class OrderService {
 
     public Order findOrderById(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(NENHUMA_ORDEM_ENCONTRADA));
+                .orElseThrow(() -> new IllegalArgumentException(Messages.NENHUMA_ORDEM_ENCONTRADA));
     }
 
     public Order createNewOrder(OrderRequest orderRequest) {
@@ -104,7 +104,7 @@ public class OrderService {
                 order.getAmount()
         );
         if (order.getOrderStatus() != PENDING) {
-            throw new BusinessException(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
+            throw new BusinessException(Messages.ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
         }
 
         if (order.getOrderType().equals(OrderType.BIDS)) {
@@ -124,7 +124,7 @@ public class OrderService {
         var order = findOrderById(id);
 
         if (order.getOrderStatus() != PENDING) {
-            throw new BusinessException(ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
+            throw new BusinessException(Messages.ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS);
         }
 
         if (order.getOrderType().equals(OrderType.BIDS)) {
@@ -139,7 +139,7 @@ public class OrderService {
         orderRepository.save(order);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", ORDEM_CANCELADA_COM_SUCESSO);
+        response.put("message", Messages.ORDEM_CANCELADA_COM_SUCESSO);
         response.put("statusCode", String.valueOf(HttpStatus.OK));
 
         return response;
