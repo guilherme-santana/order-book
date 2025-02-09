@@ -18,7 +18,7 @@ RUN chmod +x /wait-for-it.sh
 
 # Instala o netcat e o gradle em um único comando para evitar problemas de cache
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends netcat gradle && \
+    apt-get install -y --no-install-recommends netcat-openbsd gradle && \
     rm -rf /var/lib/apt/lists/*
 
 # Executar o build do Gradle
