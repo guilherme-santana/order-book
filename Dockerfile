@@ -12,20 +12,14 @@ COPY . .
 # Tornar o wrapper executável
 RUN chmod +x gradlew
 
-# Copia os arquivos do projeto para dentro do container
-COPY . /app
-
-# Copia o script wait-for-it.sh para a raiz do container
+# Copia o script wait-for-it.sh para a raiz do container e garante permissões
 COPY wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
 
-# FORÇA a permissão de execução
-RUN chmod 777 /wait-for-it.sh
-
-# INSTALA O NETCAT (nc) PARA O wait-for-it.sh FUNCIONAR
-RUN apt-get update || true && apt-get install -y netcat
-
-# Instalar dependências para build
-RUN apt-get update && apt-get install -y gradle
+# Instala o netcat e o gradle em um único comando para evitar problemas de cache
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends netcat gradle && \
+    rm -rf /var/lib/apt/lists/*
 
 # Executar o build do Gradle
 RUN ./gradlew build
