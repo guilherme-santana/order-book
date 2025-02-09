@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static orderbook.dataprovider.exceptions.Messages.ATIVO_INVALIDO;
-import static orderbook.dataprovider.exceptions.Messages.QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO;
+import static orderbook.domain.messages.Messages.*;
 
 @Service
 public class CustomerStockService {
@@ -33,7 +32,8 @@ public class CustomerStockService {
 
     public List<CustomerStock> findCustomerStockByCustomerId(Long customerId) {
         return customerStockRepository.findByCustomerID(customerId)
-                .orElseThrow(() -> new BusinessException(ATIVO_INVALIDO));
+                .filter(list -> !list.isEmpty())
+                .orElseThrow(() -> new BusinessException(DADO_NAO_ENCONTRADO));
     }
 
     public CustomerStock findByCustomerAndAsset(Long customerId, Long assetId) {

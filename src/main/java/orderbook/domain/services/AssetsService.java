@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static orderbook.dataprovider.exceptions.Messages.ATIVO_INVALIDO;
+import static orderbook.domain.messages.Messages.ATIVO_INVALIDO;
 
 @Service
 public class AssetsService {

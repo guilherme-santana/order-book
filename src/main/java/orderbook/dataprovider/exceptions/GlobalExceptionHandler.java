@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
         response.put("Error", Map.of(
                 "message", ex.getMessage(),
-                "status code", HttpStatus.BAD_REQUEST.value()
+                "statusCode", HttpStatus.BAD_REQUEST.value()
         ));
         log.error("M=handleIllegalArgument, error={}", response);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
 
         errorDetails.put("Error", Map.of(
                 "message", fieldErrors,
-                "status code", HttpStatus.BAD_REQUEST.value()
+                "statusCode", HttpStatus.BAD_REQUEST.value()
         ));
         log.error("M=handleValidationExceptions, error={}", errorDetails);
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
         response.put("Error", Map.of(
                 "message", detailedMessage,
-                "status code", HttpStatus.BAD_REQUEST.value()
+                "statusCode", HttpStatus.BAD_REQUEST.value()
         ));
         log.error("M=handleHttpMessageNotReadable, error={}", response);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
         response.put("Error", Map.of(
                 "message", errors,
-                "status code", HttpStatus.BAD_REQUEST.value()
+                "statusCode", HttpStatus.BAD_REQUEST.value()
         ));
         log.error("M=handleConstraintViolation, error={}", response);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("Error", Map.of(
                 "message", ex.getMessage(),
-                "status code", HttpStatus.INTERNAL_SERVER_ERROR.value()
+                "statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value()
         ));
         log.error("M=handleGeneralException, error={}", errorDetails);
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
         response.put("Error", Map.of(
                 "message", ex.getMessage(),
-                "status code", HttpStatus.UNPROCESSABLE_ENTITY.value()
+                "statusCode", HttpStatus.UNPROCESSABLE_ENTITY.value()
         ));
         log.error("M=handleBusinessException, error={}", response);
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);

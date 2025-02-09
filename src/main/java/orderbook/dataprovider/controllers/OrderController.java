@@ -71,10 +71,10 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> cancelOrder(@PathVariable Long id) {
-        orderService.cancelOrder(id);
+        var response = orderService.cancelOrder(id);
         log.info("M=cancelOrder, orderId = {}, statusCode = {}", id, HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(null);
+                .body(response);
     }
 
 }

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-import static orderbook.dataprovider.exceptions.Messages.DADO_NAO_ENCONTRADO;
-import static orderbook.dataprovider.exceptions.Messages.SALDO_INSUFICIENTE;
+import static orderbook.domain.messages.Messages.DADO_NAO_ENCONTRADO;
+import static orderbook.domain.messages.Messages.SALDO_INSUFICIENTE;
 
 @Service
 public class WalletService {

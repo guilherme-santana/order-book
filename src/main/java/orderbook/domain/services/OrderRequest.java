@@ -8,7 +8,7 @@ import orderbook.enuns.OrderType;
 
 import java.math.BigDecimal;
 
-import static orderbook.dataprovider.exceptions.Messages.*;
+import static orderbook.domain.messages.Messages.*;
 
 public class OrderRequest {
     @NotNull(message = ASSET_ID_DEVE_SER_INFORMADO)

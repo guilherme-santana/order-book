@@ -7,7 +7,7 @@ import orderbook.dataprovider.exceptions.BusinessException;
 
 import java.math.BigDecimal;
 
-import static orderbook.dataprovider.exceptions.Messages.*;
+import static orderbook.domain.messages.Messages.*;
 
 public class OrderUpdateRequest {
 

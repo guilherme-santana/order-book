@@ -5,7 +5,7 @@ import orderbook.dataprovider.exceptions.BusinessException;
 
 import java.math.BigDecimal;
 
-import static orderbook.dataprovider.exceptions.Messages.SALDO_INSUFICIENTE;
+import static orderbook.domain.messages.Messages.SALDO_INSUFICIENTE;
 
 @Entity
 @Table(name = "wallet")

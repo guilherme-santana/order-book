@@ -7,14 +7,16 @@ import orderbook.enuns.OrderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static orderbook.dataprovider.exceptions.Messages.NENHUMA_ORDEM_ENCONTRADA;
-import static orderbook.dataprovider.exceptions.Messages.ORDENS_EXECUTADAS_OU_CANCELADAS_NAO_PODEM_SER_ALTERADAS;
+import static orderbook.domain.messages.Messages.*;
 import static orderbook.enuns.OrderStatus.*;
 
 
@@ -118,7 +120,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public void cancelOrder(Long id) {
+    public Map<String, String> cancelOrder(Long id) {
         var order = findOrderById(id);
 
         if (order.getOrderStatus() != PENDING) {
@@ -135,6 +137,13 @@ public class OrderService {
         order.setLocalDateTime(LocalDateTime.now());
         log.info("M=cancelOrder, status = {}", order.getOrderStatus());
         orderRepository.save(order);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", ORDEM_CANCELADA_COM_SUCESSO);
+        response.put("statusCode", String.valueOf(HttpStatus.OK));
+
+        return response;
+
     }
 
     private Order executeOrder(List<Order> ordersMatch, Order orderInExecution) {

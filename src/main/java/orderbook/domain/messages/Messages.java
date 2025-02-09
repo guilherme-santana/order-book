@@ -1,4 +1,4 @@
-package orderbook.dataprovider.exceptions;
+package orderbook.domain.messages;
 
 public class Messages {
 
@@ -19,5 +19,6 @@ public class Messages {
     public static final String AMOUNT_NAO_PODE_SER_MENOR_IGUAL_A_ZERO = "amount não pode ser menor ou igual a zero!";
     public static final String DADO_NAO_ENCONTRADO = "Dado Não encontrado!";
     public static final String NENHUMA_ORDEM_ENCONTRADA = "Nenhuma ordem encontrada";
+    public static final String ORDEM_CANCELADA_COM_SUCESSO = "Ordem cancelada com sucesso!";
 
 }
