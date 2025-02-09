@@ -162,15 +162,16 @@ public class OrderService {
                         executeOrderWhenOrderInExecutionAndOrderMatchIsSatisfactory(orderMatch, orderInExecution);
                     }
 
-                    if (orderInExecution.getOrderType().equals(OrderType.BIDS)) {
-                        walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
-                        customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
-                    } else {
-                        walletService.updateSellerWallet(orderInExecution.getCustomer().getId(), orderInExecution);
-                        customerStockService.updateBuyerStockAsset(orderMatch.getCustomer(), orderInExecution);
-                    }
+                }
+                if (orderInExecution.getOrderType().equals(OrderType.BIDS)) {
+                    walletService.updateSellerWallet(orderMatch.getCustomer().getId(), orderInExecution);
+                    customerStockService.updateBuyerStockAsset(orderInExecution.getCustomer(), orderInExecution);
+                } else {
+                    walletService.updateSellerWallet(orderInExecution.getCustomer().getId(), orderInExecution);
+                    customerStockService.updateBuyerStockAsset(orderMatch.getCustomer(), orderInExecution);
                 }
             }
+
 
         }
         if (orderInExecution.getOrderStatus() == EXECUTED) {

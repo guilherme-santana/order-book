@@ -2,7 +2,6 @@ package orderbook.domain.messages;
 
 public class Messages {
 
-    public static final String ATIVO_NAO_ENCONTRADO = "Ativo não encontrado!";
     public static final String QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO = "Quantidade de ativo não suficiente para realizar a operação!";
     public static final String SALDO_INSUFICIENTE = "Saldo insuficiente!";
     public static final String CLIENTE_INVALIDO = "Cliente inválido";
