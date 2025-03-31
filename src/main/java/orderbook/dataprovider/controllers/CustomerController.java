@@ -31,7 +31,7 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<?> registerCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
-        var response = customerService.createCustomer(customerRequest);
+        customerService.createCustomer(customerRequest);
         log.info("M=registerCustomer, statusCode = {}", HttpStatus.CREATED);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
