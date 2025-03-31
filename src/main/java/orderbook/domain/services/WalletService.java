@@ -3,6 +3,7 @@ package orderbook.domain.services;
 import orderbook.dataprovider.exceptions.BusinessException;
 import orderbook.dataprovider.repositories.WalletRepository;
 import orderbook.domain.messages.Messages;
+import orderbook.domain.models.Customer;
 import orderbook.domain.models.Order;
 import orderbook.domain.models.Wallet;
 import org.slf4j.Logger;
@@ -24,20 +25,34 @@ public class WalletService {
         this.walletRepository = walletRepository;
     }
 
-    public Wallet findWalletByCustomerId(Long id){
-            return walletRepository.findByCustomerID(id)
-                    .orElseThrow(() -> new IllegalArgumentException(Messages.DADO_NAO_ENCONTRADO));
+    public Wallet findWalletByCustomerId(Long id) {
+        return walletRepository.findByCustomerID(id)
+                .orElseThrow(() -> new IllegalArgumentException(Messages.DADO_NAO_ENCONTRADO));
+    }
+
+    public Wallet createWallet(Customer customer) {
+        var wallet = new Wallet();
+        wallet.updateBalance(BigDecimal.valueOf(0));
+        wallet.setCustomer(customer);
+        return walletRepository.save(wallet);
+    }
+
+    public Wallet capitalContribution(Long customerId, BigDecimal balance) {
+        var wallet = findWalletByCustomerId(customerId);
+        var newBalance = wallet.getBalance().add(balance);
+        wallet.updateBalance(newBalance);
+        return walletRepository.save(wallet);
     }
 
 
-    public void createTransactionBidWallet(Order order){
+    public void createTransactionBidWallet(Order order) {
         var wallet = findWalletByCustomerId(order.getCustomer().getId());
         log.info("M=createTransactionBidWallet, balance = {}, customerId = {}", wallet.getBalance(), wallet.getCustomer().getId());
         var actualBalance = wallet.getBalance();
         var amount = order.getAmount();
         var orderPrice = order.getPrice().multiply(BigDecimal.valueOf(amount)); // order
 
-        if(actualBalance.compareTo(orderPrice) < 0){     //wallet
+        if (actualBalance.compareTo(orderPrice) < 0) {     //wallet
             throw new BusinessException(Messages.SALDO_INSUFICIENTE);
         }
 
@@ -49,7 +64,7 @@ public class WalletService {
         walletRepository.save(wallet);
     }
 
-    public void updateTransactionBidWallet(Order order, OrderUpdateRequest orderRequest){
+    public void updateTransactionBidWallet(Order order, OrderUpdateRequest orderRequest) {
         var originalPrice = order.getOriginalprice(order);
 
         var wallet = findWalletByCustomerId(order.getCustomer().getId());
@@ -61,7 +76,7 @@ public class WalletService {
         var amount = orderRequest.getAmount();
         var newOrderPrice = orderRequest.getPrice().multiply(BigDecimal.valueOf(amount));
 
-        if(realBalance.compareTo(newOrderPrice) < 0){
+        if (realBalance.compareTo(newOrderPrice) < 0) {
             throw new BusinessException(Messages.SALDO_INSUFICIENTE);
         }
 
@@ -72,7 +87,7 @@ public class WalletService {
         walletRepository.save(wallet);
     }
 
-    public void cancellTransactionBidWallet(Order order){
+    public void cancellTransactionBidWallet(Order order) {
         var wallet = findWalletByCustomerId(order.getCustomer().getId());
         log.info("M=cancellTransactionBidWallet, balance = {}, customerId = {}", wallet.getBalance(), wallet.getCustomer().getId());
 
@@ -87,7 +102,7 @@ public class WalletService {
         walletRepository.save(wallet);
     }
 
-    public void updateSellerWallet(Long sellerId, Order order){
+    public void updateSellerWallet(Long sellerId, Order order) {
         var sellerWallet = findWalletByCustomerId(sellerId);
         log.info("M=updateSellerWallet, balance = {}, customerId = {}", sellerWallet.getBalance(), sellerWallet.getCustomer().getId());
 

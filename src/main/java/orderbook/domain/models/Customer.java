@@ -1,9 +1,6 @@
 package orderbook.domain.models;
 
 import jakarta.persistence.*;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Entity
 @Table(name = "customer")
@@ -21,7 +18,8 @@ public class Customer {
         this.document = document;
     }
 
-    public Customer() {}
+    public Customer() {
+    }
 
     public long getId() {
         return id;

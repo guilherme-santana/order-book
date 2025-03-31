@@ -23,7 +23,6 @@ public class CustomerStockController {
 
     @GetMapping("/customer/{id}")
     public List<CustomerStock> findByCustomerId(@PathVariable Long id) {
-
         return customerStockService.findCustomerStockByCustomerId(id);
     }
 }
