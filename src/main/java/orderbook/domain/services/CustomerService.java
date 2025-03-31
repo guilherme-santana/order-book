@@ -28,8 +28,12 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
-    private Customer findCustomerByDocument(Integer document) {
+    public Customer findCustomerByDocument(Integer document) {
         return customerRepository.findCustomerByDocument(document).orElse(null);
+    }
+
+    public Customer findCustomerByEmail(String email) {
+        return customerRepository.findCustomerByEmail(email).orElseThrow(() -> new BusinessException(Messages.USARIO_SENHA_INVALIDO));
     }
 
     public Customer findCustomerById(Long id) {
@@ -43,8 +47,8 @@ public class CustomerService {
     }
 
     public Customer createCustomer(CustomerRequest customerRequest) {
-        if (findCustomerByDocument(customerRequest.getDocument()) == null) {
-            var customer = new Customer(customerRequest.getName(),customerRequest.getDocument());
+        if (findCustomerByDocument(customerRequest.getDocument()) == null && findCustomerByEmail(customerRequest.getEmail()) == null) {
+            var customer = new Customer(customerRequest.getName(),customerRequest.getDocument(), customerRequest.getEmail());
             var customerCreated = customerRepository.save(customer);
             walletService.createWallet(customerCreated);
             passwordService.createPassword(customerCreated, customerRequest.getPassword());

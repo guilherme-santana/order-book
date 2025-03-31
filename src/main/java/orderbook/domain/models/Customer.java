@@ -11,11 +11,13 @@ public class Customer {
     private long id;
     private String name;
     private Integer document;
+    private String email;
 
 
-    public Customer(String name, Integer document) {
+    public Customer(String name, Integer document, String email) {
         this.name = name;
         this.document = document;
+        this.email = email;
     }
 
     public Customer() {
@@ -46,4 +48,11 @@ public class Customer {
         this.document = document;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

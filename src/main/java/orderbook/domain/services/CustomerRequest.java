@@ -2,6 +2,7 @@ package orderbook.domain.services;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import orderbook.domain.messages.Messages;
@@ -12,14 +13,26 @@ import java.math.BigDecimal;
 
 public class CustomerRequest {
 
-    @NotNull(message = Messages.CUSTOMER_ID_DEVE_SER_INFORMADO)
+    @NotNull(message = Messages.VALOR_INVALIDO)
     private String name;
 
-    @NotNull(message = Messages.CUSTOMER_ID_DEVE_SER_INFORMADO)
+    @NotNull(message = Messages.VALOR_INVALIDO)
     private Integer document;
 
     @NotNull(message = Messages.VALOR_INVALIDO)
+    @Email(message = Messages.EMAIL_INVALIDO)
+    private String email;
+
+    @NotNull(message = Messages.VALOR_INVALIDO)
     private String password;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getName() {
         return name;

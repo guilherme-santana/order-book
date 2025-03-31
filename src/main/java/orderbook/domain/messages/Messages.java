@@ -5,7 +5,9 @@ public class Messages {
     public static final String QUANTIDADE_DE_ATIVO_NAO_SUFICIENTE_PARA_REALIZAR_A_OPERACAO = "Quantidade de ativo não suficiente para realizar a operação!";
     public static final String SALDO_INSUFICIENTE = "Saldo insuficiente!";
     public static final String VALOR_INVALIDO = "Valor inválido!";
+    public static final String EMAIL_INVALIDO = "Email inválido!";
     public static final String CLIENTE_INVALIDO = "Cliente inválido";
+    public static final String USARIO_SENHA_INVALIDO = "Usuário ou senha invalido";
     public static final String CLIENTE_NAO_ENCONTRADO = "Cliente não encontrado";
     public static final String NOME_NAO_INFORMADO = "Nome não informado";
     public static final String DOCUMENTO_NAO_INFORMADO = "Documento não informado";
